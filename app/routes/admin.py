@@ -159,18 +159,31 @@ def import_questions():
             else:
                 flash('請提供JSON數據或上傳文件', 'error')
                 return redirect(url_for('admin.import_questions'))
-            
-            # 處理不同的JSON格式
-            if 'questions' in json_data:
+              # 處理不同的JSON格式
+            if 'quiz' in json_data and 'questions' in json_data['quiz']:
+                # 格式: {"quiz": {"questions": [...]}}
+                questions = json_data['quiz']['questions']
+            elif 'questions' in json_data:
+                # 格式: {"questions": [...]}
                 questions = json_data['questions']
             elif isinstance(json_data, list):
+                # 格式: [...]
                 questions = json_data
             else:
                 flash('JSON格式不正確', 'error')
                 return redirect(url_for('admin.import_questions'))
             
-            # 執行導入
-            result = question_service.import_questions_from_json(questions)
+            # 標準化題目格式
+            normalized_questions = []
+            for q in questions:
+                try:
+                    normalized_q = question_service.normalize_question_format(q)
+                    normalized_questions.append(normalized_q)
+                except Exception as e:
+                    flash(f'題目格式化失敗: {str(e)}', 'warning')
+                    continue
+              # 執行導入
+            result = question_service.import_questions_from_json(normalized_questions)
             
             flash(f'導入完成！成功: {result["success"]}, 跳過: {result["skipped"]}, 失敗: {result["failed"]}', 'info')
             

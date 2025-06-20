@@ -68,3 +68,14 @@ test_*
 debug_*
 temp_*
 tmp_*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.env.docker.local
+data/
+ssl/
+nginx/logs/
+volumes/
+docker-data/
+*.dockerfile.bak

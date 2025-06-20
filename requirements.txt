@@ -3,8 +3,8 @@
 Flask==3.0.0
 Werkzeug==3.0.1
 
-# 數據處理
-sqlite3  # Python內建，無需安裝
+# 生產環境Web服務器
+gunicorn==21.2.0
 
 # 開發工具
 python-dotenv==1.0.0  # 環境變數管理

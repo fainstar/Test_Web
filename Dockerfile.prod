@@ -1,0 +1,46 @@
+# 生產環境 Dockerfile
+FROM python:3.11-slim
+
+# 設置工作目錄
+WORKDIR /app
+
+# 設置環境變數
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    FLASK_ENV=production \
+    FLASK_APP=run.py
+
+# 安裝系統依賴
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 創建非root用戶
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+# 複製requirements文件
+COPY requirements.txt .
+
+# 安裝Python依賴
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 複製應用程式代碼
+COPY . .
+
+# 創建必要的目錄
+RUN mkdir -p volumes/database volumes/logs static/uploads && \
+    chown -R appuser:appgroup /app
+
+# 切換到非root用戶
+USER appuser
+
+# 健康檢查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:5000/api || exit 1
+
+# 暴露端口
+EXPOSE 5000
+
+# 啟動應用
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "run:app"]

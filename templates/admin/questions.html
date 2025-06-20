@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}題目管理 - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>題目管理
+                    </h4>
+                    <div>
+                        <a href="{{ url_for('admin.add_question') }}" class="btn btn-success me-2">
+                            <i class="fas fa-plus me-2"></i>新增題目
+                        </a>
+                        <a href="{{ url_for('admin.import_questions') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-upload me-2"></i>批量導入
+                        </a>
+                        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>返回管理面板
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                        <!-- 統計信息 -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ questions|length }}</h5>
+                                        <p class="mb-0">總題目數</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ questions|selectattr("type", "equalto", "single")|list|length }}</h5>
+                                        <p class="mb-0">單選題</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ questions|selectattr("type", "equalto", "multiple")|list|length }}</h5>
+                                        <p class="mb-0">多選題</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ (questions|selectattr("explanation")|list|length / questions|length * 100)|round(1) }}%</h5>
+                                        <p class="mb-0">有解析</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 搜索和過濾 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="searchInput" 
+                                           placeholder="搜索題目內容...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-control" id="typeFilter">
+                                    <option value="">所有題型</option>
+                                    <option value="single">單選題</option>
+                                    <option value="multiple">多選題</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-control" id="explanationFilter">
+                                    <option value="">所有題目</option>
+                                    <option value="with">有解析</option>
+                                    <option value="without">無解析</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 題目列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 5%">#</th>
+                                        <th style="width: 10%">題型</th>
+                                        <th style="width: 45%">題目內容</th>
+                                        <th style="width: 25%">選項</th>
+                                        <th style="width: 10%">解析</th>
+                                        <th style="width: 15%">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="questionsTable">
+                                    {% for question in questions %}
+                                    <tr class="question-row" 
+                                        data-type="{{ question.type }}"
+                                        data-has-explanation="{{ 'true' if question.explanation else 'false' }}">
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            {% if question.type == 'single' %}
+                                                <span class="badge bg-success">單選</span>
+                                            {% else %}
+                                                <span class="badge bg-info">多選</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="question-content">
+                                                {{ question.question[:100] }}
+                                                {% if question.question|length > 100 %}...{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {% for option in question.options %}
+                                                    <div class="{% if loop.index0 in question.correct_answer %}text-success fw-bold{% endif %}">
+                                                        {{ loop.index }}. {{ option[:30] }}
+                                                        {% if option|length > 30 %}...{% endif %}
+                                                        {% if loop.index0 in question.correct_answer %}
+                                                            <i class="fas fa-check text-success"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if question.explanation %}
+                                                <i class="fas fa-check text-success" title="有解析"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-muted" title="無解析"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" 
+                                                        onclick="viewQuestion({{ question.id }})"
+                                                        title="查看詳情">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <a href="{{ url_for('admin.add_question', edit=question.id) }}" 
+                                                   class="btn btn-outline-warning"
+                                                   title="編輯">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-outline-danger" 
+                                                        onclick="deleteQuestion({{ question.id }})"
+                                                        title="刪除">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">還沒有題目</h5>
+                            <p class="text-muted">開始添加一些題目吧！</p>
+                            <a href="{{ url_for('admin.add_question') }}" class="btn btn-success me-2">
+                                <i class="fas fa-plus me-2"></i>新增題目
+                            </a>
+                            <a href="{{ url_for('admin.import_questions') }}" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>批量導入
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 查看題目詳情的模態框 -->
+<div class="modal fade" id="questionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">題目詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="questionModalBody">
+                <!-- 動態載入題目詳情 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 搜索功能
+document.getElementById('searchInput').addEventListener('input', filterQuestions);
+document.getElementById('typeFilter').addEventListener('change', filterQuestions);
+document.getElementById('explanationFilter').addEventListener('change', filterQuestions);
+
+function filterQuestions() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const typeFilter = document.getElementById('typeFilter').value;
+    const explanationFilter = document.getElementById('explanationFilter').value;
+    const rows = document.querySelectorAll('.question-row');
+
+    rows.forEach(row => {
+        const questionText = row.querySelector('.question-content').textContent.toLowerCase();
+        const questionType = row.dataset.type;
+        const hasExplanation = row.dataset.hasExplanation === 'true';
+
+        const matchesSearch = questionText.includes(searchTerm);
+        const matchesType = !typeFilter || questionType === typeFilter;
+        const matchesExplanation = !explanationFilter || 
+            (explanationFilter === 'with' && hasExplanation) ||
+            (explanationFilter === 'without' && !hasExplanation);
+
+        if (matchesSearch && matchesType && matchesExplanation) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// 查看題目詳情
+async function viewQuestion(questionId) {
+    try {
+        const response = await fetch(`/api/questions/${questionId}`);
+        const question = await response.json();
+        
+        const modalBody = document.getElementById('questionModalBody');
+        modalBody.innerHTML = `
+            <div class="mb-3">
+                <strong>題型：</strong>
+                <span class="badge ${question.type === 'single' ? 'bg-success' : 'bg-info'}">
+                    ${question.type === 'single' ? '單選題' : '多選題'}
+                </span>
+            </div>
+            <div class="mb-3">
+                <strong>題目：</strong>
+                <p class="mt-2">${question.question}</p>
+            </div>
+            <div class="mb-3">
+                <strong>選項：</strong>
+                <ol class="mt-2">
+                    ${question.options.map((option, index) => `
+                        <li class="${question.correct_answer.includes(index) ? 'text-success fw-bold' : ''}">
+                            ${option}
+                            ${question.correct_answer.includes(index) ? '<i class="fas fa-check text-success ms-2"></i>' : ''}
+                        </li>
+                    `).join('')}
+                </ol>
+            </div>
+            ${question.explanation ? `
+                <div class="mb-3">
+                    <strong>解析：</strong>
+                    <p class="mt-2 text-muted">${question.explanation}</p>
+                </div>
+            ` : ''}
+        `;
+        
+        new bootstrap.Modal(document.getElementById('questionModal')).show();
+    } catch (error) {
+        alert('載入題目詳情失敗');
+    }
+}
+
+// 刪除題目
+function deleteQuestion(questionId) {
+    if (confirm('確定要刪除這個題目嗎？此操作不可撤銷。')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/questions/${questionId}/delete`;
+        
+        const csrfToken = document.querySelector('meta[name=csrf-token]');
+        if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrf_token';
+            input.value = csrfToken.getAttribute('content');
+            form.appendChild(input);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+.question-content {
+    max-width: 400px;
+    word-wrap: break-word;
+}
+.table th {
+    border-top: none;
+}
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

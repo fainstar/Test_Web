@@ -9,10 +9,10 @@ from app import create_app
 app = create_app()
 
 if __name__ == '__main__':
-    # 開發環境設定
-    debug_mode = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
-    port = int(os.environ.get('PORT', 5000))
-    host = os.environ.get('HOST', '127.0.0.1')
+    # 從環境變數獲取配置，Docker友好設定
+    debug_mode = os.environ.get('FLASK_DEBUG', os.environ.get('FLASK_ENV', 'production') == 'development').lower() == 'true'
+    port = int(os.environ.get('PORT', os.environ.get('APP_PORT', 5000)))
+    host = os.environ.get('HOST', os.environ.get('APP_HOST', '0.0.0.0'))  # Docker中監聽所有介面
     
     print(f"🚀 啟動線上測驗系統...")
     print(f"📍 訪問地址: http://{host}:{port}")

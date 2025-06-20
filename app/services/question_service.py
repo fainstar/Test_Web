@@ -218,3 +218,62 @@ class QuestionService:
             shuffled_questions.append(shuffled_question)
         
         return shuffled_questions
+    
+    def normalize_question_format(self, question_data: Dict[str, Any]) -> Dict[str, Any]:
+        """標準化不同格式的題目數據"""
+        # 基本字段映射
+        normalized = {
+            'question': question_data.get('question', ''),
+            'options': question_data.get('options', []),
+            'category': question_data.get('category', '一般'),
+            'difficulty': question_data.get('difficulty', '中等'),
+            'explanation': question_data.get('explanation', '')
+        }
+        
+        # 處理題目類型
+        question_type = question_data.get('type', question_data.get('question_type', 'single'))
+        if question_type in ['single_choice', 'single']:
+            normalized['type'] = 'single'
+        elif question_type in ['multiple_choice', 'multiple']:
+            normalized['type'] = 'multiple'
+        else:
+            normalized['type'] = 'single'  # 默認為單選
+        
+        # 處理正確答案
+        correct_answer = question_data.get('correct_answer')
+        
+        if isinstance(correct_answer, str):
+            # 如果正確答案是文字，需要找到對應的索引
+            try:
+                answer_index = normalized['options'].index(correct_answer)
+                normalized['correct_answer'] = [answer_index] if normalized['type'] == 'multiple' else answer_index
+            except ValueError:
+                # 如果找不到匹配的選項，設為第一個選項
+                normalized['correct_answer'] = [0] if normalized['type'] == 'multiple' else 0
+        
+        elif isinstance(correct_answer, list):
+            # 如果是列表
+            answer_indices = []
+            for ans in correct_answer:
+                if isinstance(ans, str):
+                    try:
+                        answer_indices.append(normalized['options'].index(ans))
+                    except ValueError:
+                        continue
+                elif isinstance(ans, int):
+                    answer_indices.append(ans)
+            
+            if normalized['type'] == 'multiple':
+                normalized['correct_answer'] = answer_indices
+            else:
+                normalized['correct_answer'] = answer_indices[0] if answer_indices else 0
+        
+        elif isinstance(correct_answer, int):
+            # 如果已經是索引
+            normalized['correct_answer'] = [correct_answer] if normalized['type'] == 'multiple' else correct_answer
+        
+        else:
+            # 默認設置
+            normalized['correct_answer'] = [0] if normalized['type'] == 'multiple' else 0
+        
+        return normalized

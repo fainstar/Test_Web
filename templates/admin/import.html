@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}批量導入題目 - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>批量導入題目
+                    </h4>
+                    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>返回管理面板
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- 文件上傳區域 -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-file-upload me-2"></i>文件上傳
+                                </h5>
+                                <form action="{{ url_for('admin.import_questions') }}" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label">選擇題庫文件</label>
+                                        <input type="file" class="form-control" id="file" name="file" 
+                                               accept=".json,.txt,.csv" required>
+                                        <div class="form-text">
+                                            支援格式：JSON, TXT, CSV
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>上傳並導入
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 mb-4">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-code me-2"></i>JSON 格式導入
+                                </h5>
+                                <form action="{{ url_for('admin.import_questions') }}" method="post">
+                                    <div class="mb-3">
+                                        <label for="json_data" class="form-label">JSON 數據</label>
+                                        <textarea class="form-control" id="json_data" name="json_data" 
+                                                  rows="8" placeholder='請輸入 JSON 格式的題目數據...'></textarea>
+                                        <div class="form-text">
+                                            直接貼上JSON格式的題目數據
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-plus me-2"></i>導入題目
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 格式說明 -->
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>支援的文件格式
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">                                    <h6 class="text-primary">JSON 格式範例：</h6>
+                                    <div class="nav nav-pills mb-3" role="tablist">
+                                        <button class="nav-link active btn-sm" data-bs-toggle="pill" data-bs-target="#format1">標準格式</button>
+                                        <button class="nav-link btn-sm" data-bs-toggle="pill" data-bs-target="#format2">嵌套格式</button>
+                                        <button class="nav-link btn-sm" data-bs-toggle="pill" data-bs-target="#format3">直接陣列</button>
+                                    </div>
+                                    
+                                    <div class="tab-content">                                        <div class="tab-pane fade show active" id="format1">
+                                            <pre class="bg-light text-dark p-3 rounded border"><code>{
+  "questions": [
+    {
+      "question": "Python是什麼類型的程式語言？",
+      "type": "single",
+      "options": ["編譯型語言", "解釋型語言", "組合語言"],
+      "correct_answer": 1,
+      "explanation": "Python是一種解釋型的高階程式語言。"
+    }
+  ]
+}</code></pre>
+                                        </div>
+                                        
+                                        <div class="tab-pane fade" id="format2">
+                                            <pre class="bg-light text-dark p-3 rounded border"><code>{
+  "quiz": {
+    "title": "測驗標題",
+    "questions": [
+      {
+        "question": "您可以在哪一層套用內容篩選？",
+        "type": "single_choice",
+        "options": ["metaprompt", "模型", "安全系統", "用戶體驗"],
+        "correct_answer": "安全系統"
+      }
+    ]
+  }
+}</code></pre>
+                                            <div class="text-info small mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                支援文字答案自動轉換為索引，如 quiz_complete02.json 格式
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="tab-pane fade" id="format3">
+                                            <pre class="bg-light text-dark p-3 rounded border"><code>[
+  {
+    "question": "以下哪些是Python的特點？",
+    "type": "multiple",
+    "options": ["語法簡潔", "跨平台", "開源免費", "效能最快"],
+    "correct_answer": [0, 1, 2]
+  }
+]</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">                                    <h6 class="text-info">TXT 格式範例：</h6>
+                                    <pre class="bg-light text-dark p-3 rounded border small"><code>Q: Python是什麼類型的程式語言？
+A: 編譯型語言
+B: 解釋型語言 (正確)
+C: 組合語言
+D: 機器語言
+解析: Python是一種解釋型的高階程式語言。
+
+Q: 以下哪些是Python的特點？ (多選)
+A: 語法簡潔 (正確)
+B: 跨平台 (正確)
+C: 開源免費 (正確)
+D: 效能最快</code></pre>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-warning">CSV 格式範例：</h6>
+                                    <pre class="bg-light text-dark p-3 rounded border small"><code>question,type,option1,option2,option3,option4,correct,explanation
+"Python是什麼類型的程式語言？","single","編譯型語言","解釋型語言","組合語言","機器語言","2","Python是一種解釋型的高階程式語言。"
+"以下哪些是Python的特點？","multiple","語法簡潔","跨平台","開源免費","效能最快","1,2,3","Python具有語法簡潔、跨平台、開源免費等特點。"</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">                                <h6 class="text-dark">格式說明：</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i><strong>題目類型</strong>: "single"/"single_choice" (單選) 或 "multiple"/"multiple_choice" (多選)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i><strong>正確答案</strong>: 支援索引數字、選項文字、或陣列格式</li>
+                                    <li><i class="fas fa-check text-success me-2"></i><strong>JSON結構</strong>: 支援標準格式、嵌套格式(quiz.questions)、直接陣列</li>
+                                    <li><i class="fas fa-info text-info me-2"></i>系統會自動去重、格式轉換、容錯處理</li>
+                                    <li><i class="fas fa-star text-warning me-2"></i>已測試支援 quiz_complete02.json 等多種格式</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+pre {
+    font-size: 0.85em;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.border {
+    border-color: #dee2e6 !important;
+}
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+{% endblock %}

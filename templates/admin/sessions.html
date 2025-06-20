@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}測驗會話管理 - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-users me-2"></i>測驗會話管理
+                    </h4>
+                    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>返回管理面板
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if sessions %}
+                        <!-- 統計卡片 -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ sessions|length }}</h5>
+                                        <p class="mb-0">總會話數</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ sessions|selectattr("status", "equalto", "completed")|list|length }}</h5>
+                                        <p class="mb-0">已完成</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5>{{ sessions|selectattr("status", "equalto", "in_progress")|list|length }}</h5>
+                                        <p class="mb-0">進行中</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        {% set completed_sessions = sessions|selectattr("status", "equalto", "completed")|list %}
+                                        {% if completed_sessions %}
+                                            <h5>{{ (completed_sessions|sum(attribute='score') / completed_sessions|length)|round(1) }}%</h5>
+                                        {% else %}
+                                            <h5>N/A</h5>
+                                        {% endif %}
+                                        <p class="mb-0">平均分數</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 過濾選項 -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-control" id="statusFilter">
+                                    <option value="">所有狀態</option>
+                                    <option value="in_progress">進行中</option>
+                                    <option value="completed">已完成</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-control" id="sortBy">
+                                    <option value="created_at">按創建時間</option>
+                                    <option value="score">按分數</option>
+                                    <option value="total_questions">按題目數</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="searchInput" 
+                                           placeholder="搜索會話ID...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 會話列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>會話ID</th>
+                                        <th>狀態</th>
+                                        <th>題目數量</th>
+                                        <th>答題進度</th>
+                                        <th>分數</th>
+                                        <th>創建時間</th>
+                                        <th>完成時間</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sessionsTable">
+                                    {% for session in sessions %}
+                                    <tr class="session-row" 
+                                        data-status="{{ session.status }}"
+                                        data-session-id="{{ session.id }}">
+                                        <td>
+                                            <code>{{ session.id[:8] }}...</code>
+                                        </td>
+                                        <td>
+                                            {% if session.status == 'completed' %}
+                                                <span class="badge bg-success">已完成</span>
+                                            {% elif session.status == 'in_progress' %}
+                                                <span class="badge bg-warning">進行中</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ session.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ session.total_questions }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                    {% set progress = (session.current_question / session.total_questions * 100) if session.total_questions > 0 else 0 %}
+                                                    <div class="progress-bar {% if session.status == 'completed' %}bg-success{% else %}bg-primary{% endif %}" 
+                                                         style="width: {{ progress }}%"></div>
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ session.current_question }}/{{ session.total_questions }}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if session.status == 'completed' %}
+                                                <span class="fw-bold {% if session.score >= 80 %}text-success{% elif session.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                                    {{ session.score }}%
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">--</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                        </td>
+                                        <td>
+                                            {% if session.completed_at %}
+                                                <small>{{ session.completed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% else %}
+                                                <span class="text-muted">--</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" 
+                                                        onclick="viewSession('{{ session.id }}')"
+                                                        title="查看詳情">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                {% if session.status == 'completed' %}
+                                                <button class="btn btn-outline-success" 
+                                                        onclick="exportSession('{{ session.id }}')"
+                                                        title="導出結果">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                {% endif %}
+                                                <button class="btn btn-outline-danger" 
+                                                        onclick="deleteSession('{{ session.id }}')"
+                                                        title="刪除">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">還沒有測驗會話</h5>
+                            <p class="text-muted">當用戶開始測驗時，會話記錄會顯示在這裡</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 查看會話詳情的模態框 -->
+<div class="modal fade" id="sessionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">測驗會話詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="sessionModalBody">
+                <!-- 動態載入會話詳情 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 過濾和搜索功能
+document.getElementById('statusFilter').addEventListener('change', filterSessions);
+document.getElementById('searchInput').addEventListener('input', filterSessions);
+document.getElementById('sortBy').addEventListener('change', sortSessions);
+
+function filterSessions() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('.session-row');
+
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const sessionId = row.dataset.sessionId.toLowerCase();
+
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesSearch = !searchTerm || sessionId.includes(searchTerm);
+
+        if (matchesStatus && matchesSearch) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function sortSessions() {
+    const sortBy = document.getElementById('sortBy').value;
+    const tbody = document.getElementById('sessionsTable');
+    const rows = Array.from(tbody.querySelectorAll('.session-row'));
+
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch(sortBy) {
+            case 'score':
+                aValue = parseFloat(a.cells[4].textContent) || 0;
+                bValue = parseFloat(b.cells[4].textContent) || 0;
+                return bValue - aValue; // 降序
+            case 'total_questions':
+                aValue = parseInt(a.cells[2].textContent);
+                bValue = parseInt(b.cells[2].textContent);
+                return bValue - aValue; // 降序
+            default: // created_at
+                aValue = a.cells[5].textContent;
+                bValue = b.cells[5].textContent;
+                return bValue.localeCompare(aValue); // 降序
+        }
+    });
+
+    // 重新插入排序後的行
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// 查看會話詳情
+async function viewSession(sessionId) {
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}`);
+        const session = await response.json();
+        
+        const modalBody = document.getElementById('sessionModalBody');
+        modalBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>基本信息</h6>
+                    <table class="table table-sm">
+                        <tr><td>會話ID:</td><td><code>${session.id}</code></td></tr>
+                        <tr><td>狀態:</td><td><span class="badge ${session.status === 'completed' ? 'bg-success' : 'bg-warning'}">${session.status === 'completed' ? '已完成' : '進行中'}</span></td></tr>
+                        <tr><td>題目總數:</td><td>${session.total_questions}</td></tr>
+                        <tr><td>當前題目:</td><td>${session.current_question}</td></tr>
+                        <tr><td>創建時間:</td><td>${session.created_at}</td></tr>
+                        ${session.completed_at ? `<tr><td>完成時間:</td><td>${session.completed_at}</td></tr>` : ''}
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>測驗結果</h6>
+                    ${session.status === 'completed' ? `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>總分:</span>
+                                <span class="fw-bold ${session.score >= 80 ? 'text-success' : session.score >= 60 ? 'text-warning' : 'text-danger'}">${session.score}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar ${session.score >= 80 ? 'bg-success' : session.score >= 60 ? 'bg-warning' : 'bg-danger'}" 
+                                     style="width: ${session.score}%"></div>
+                            </div>
+                        </div>
+                        <table class="table table-sm">
+                            <tr><td>正確題數:</td><td>${session.correct_answers || 0}</td></tr>
+                            <tr><td>錯誤題數:</td><td>${(session.total_questions || 0) - (session.correct_answers || 0)}</td></tr>
+                            <tr><td>答對率:</td><td>${session.score}%</td></tr>
+                        </table>
+                    ` : '<p class="text-muted">測驗尚未完成</p>'}
+                </div>
+            </div>
+            ${session.answers && session.answers.length > 0 ? `
+                <hr>
+                <h6>答題詳情</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>題號</th>
+                                <th>題目</th>
+                                <th>用戶答案</th>
+                                <th>正確答案</th>
+                                <th>結果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${session.answers.map((answer, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${answer.question ? answer.question.substring(0, 50) + '...' : 'N/A'}</td>
+                                    <td><span class="badge bg-light text-dark">${answer.user_answer}</span></td>
+                                    <td><span class="badge bg-info">${answer.correct_answer}</span></td>
+                                    <td>
+                                        ${answer.is_correct ? 
+                                            '<i class="fas fa-check text-success"></i>' : 
+                                            '<i class="fas fa-times text-danger"></i>'
+                                        }
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : ''}
+        `;
+        
+        new bootstrap.Modal(document.getElementById('sessionModal')).show();
+    } catch (error) {
+        alert('載入會話詳情失敗');
+    }
+}
+
+// 導出會話結果
+function exportSession(sessionId) {
+    window.open(`/api/sessions/${sessionId}/export`, '_blank');
+}
+
+// 刪除會話
+function deleteSession(sessionId) {
+    if (confirm('確定要刪除這個測驗會話嗎？此操作不可撤銷。')) {
+        fetch(`/api/sessions/${sessionId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('刪除失敗');
+            }
+        })
+        .catch(error => {
+            alert('刪除失敗');
+        });
+    }
+}
+</script>
+
+<style>
+.progress {
+    height: 8px;
+}
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+.modal-xl {
+    max-width: 1200px;
+}
+</style>
+{% endblock %}

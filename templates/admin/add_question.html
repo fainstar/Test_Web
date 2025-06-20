@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}{% if question_data %}編輯題目{% else %}新增題目{% endif %} - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{% if question_data %}edit{% else %}plus{% endif %} me-2"></i>
+                        {% if question_data %}編輯題目{% else %}新增題目{% endif %}
+                    </h4>
+                    <div>
+                        <a href="{{ url_for('admin.questions') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>返回題目列表
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('admin.add_question', edit=question_data.id if question_data else None) }}" 
+                          method="post" id="questionForm">
+                        
+                        <!-- 題型選擇 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">題目類型 *</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 border rounded">
+                                        <input class="form-check-input" type="radio" name="type" id="single" 
+                                               value="single" {% if not question_data or question_data.type == 'single' %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold text-success" for="single">
+                                            <i class="fas fa-dot-circle me-2"></i>單選題
+                                            <small class="d-block text-muted">只能選擇一個正確答案</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 border rounded">
+                                        <input class="form-check-input" type="radio" name="type" id="multiple" 
+                                               value="multiple" {% if question_data and question_data.type == 'multiple' %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold text-info" for="multiple">
+                                            <i class="fas fa-check-square me-2"></i>多選題
+                                            <small class="d-block text-muted">可以選擇多個正確答案</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 題目內容 -->
+                        <div class="mb-4">
+                            <label for="question" class="form-label fw-bold">題目內容 *</label>
+                            <textarea class="form-control" id="question" name="question" rows="3" 
+                                      required placeholder="請輸入題目內容...">{% if question_data %}{{ question_data.question }}{% endif %}</textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>請清楚描述題目，確保學生能夠理解
+                            </div>
+                        </div>
+
+                        <!-- 選項設置 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">答案選項 *</label>
+                            <div id="optionsContainer">
+                                {% if question_data %}
+                                    {% for option in question_data.options %}
+                                    <div class="option-group mb-3" data-index="{{ loop.index0 }}">
+                                        <div class="input-group">
+                                            <span class="input-group-text">{{ loop.index }}</span>
+                                            <input type="text" class="form-control option-input" 
+                                                   name="options[]" value="{{ option }}" required 
+                                                   placeholder="選項內容...">
+                                            <div class="input-group-text">
+                                                <input class="form-check-input correct-answer" type="checkbox" 
+                                                       name="correct_answer[]" value="{{ loop.index0 }}"
+                                                       {% if loop.index0 in question_data.correct_answer %}checked{% endif %}>
+                                                <label class="form-check-label ms-2">正確</label>
+                                            </div>
+                                            {% if loop.index > 2 %}
+                                            <button type="button" class="btn btn-outline-danger remove-option">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="option-group mb-3" data-index="0">
+                                        <div class="input-group">
+                                            <span class="input-group-text">1</span>
+                                            <input type="text" class="form-control option-input" 
+                                                   name="options[]" required placeholder="選項內容...">
+                                            <div class="input-group-text">
+                                                <input class="form-check-input correct-answer" type="checkbox" 
+                                                       name="correct_answer[]" value="0">
+                                                <label class="form-check-label ms-2">正確</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="option-group mb-3" data-index="1">
+                                        <div class="input-group">
+                                            <span class="input-group-text">2</span>
+                                            <input type="text" class="form-control option-input" 
+                                                   name="options[]" required placeholder="選項內容...">
+                                            <div class="input-group-text">
+                                                <input class="form-check-input correct-answer" type="checkbox" 
+                                                       name="correct_answer[]" value="1">
+                                                <label class="form-check-label ms-2">正確</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="addOption">
+                                    <i class="fas fa-plus me-2"></i>增加選項
+                                </button>
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    <span id="correctAnswerHint">單選題：選擇一個正確答案</span>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- 題目解析 -->
+                        <div class="mb-4">
+                            <label for="explanation" class="form-label fw-bold">題目解析 <small class="text-muted">(可選)</small></label>
+                            <textarea class="form-control" id="explanation" name="explanation" rows="3" 
+                                      placeholder="請輸入題目解析，幫助學生理解正確答案...">{% if question_data %}{{ question_data.explanation or '' }}{% endif %}</textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>解析將在答題後顯示，幫助學生理解
+                            </div>
+                        </div>
+
+                        <!-- 提交按鈕 -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin.questions') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>取消
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if question_data %}更新題目{% else %}新增題目{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const singleRadio = document.getElementById('single');
+    const multipleRadio = document.getElementById('multiple');
+    const addOptionBtn = document.getElementById('addOption');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const correctAnswerHint = document.getElementById('correctAnswerHint');
+
+    // 題型變更處理
+    function handleTypeChange() {
+        const isMultiple = multipleRadio.checked;
+        const checkboxes = document.querySelectorAll('.correct-answer');
+        
+        if (isMultiple) {
+            // 多選題：使用 checkbox
+            checkboxes.forEach(cb => {
+                cb.type = 'checkbox';
+            });
+            correctAnswerHint.textContent = '多選題：可選擇多個正確答案';
+        } else {
+            // 單選題：使用 radio 行為
+            checkboxes.forEach(cb => {
+                cb.type = 'checkbox'; // 保持checkbox但模擬radio行為
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        checkboxes.forEach(other => {
+                            if (other !== this) other.checked = false;
+                        });
+                    }
+                });
+            });
+            correctAnswerHint.textContent = '單選題：選擇一個正確答案';
+        }
+    }
+
+    // 增加選項
+    addOptionBtn.addEventListener('click', function() {
+        const optionGroups = document.querySelectorAll('.option-group');
+        const newIndex = optionGroups.length;
+        const optionNumber = newIndex + 1;
+
+        if (newIndex >= 6) {
+            alert('最多只能添加6個選項');
+            return;
+        }
+
+        const newOptionHtml = `
+            <div class="option-group mb-3" data-index="${newIndex}">
+                <div class="input-group">
+                    <span class="input-group-text">${optionNumber}</span>
+                    <input type="text" class="form-control option-input" 
+                           name="options[]" required placeholder="選項內容...">
+                    <div class="input-group-text">
+                        <input class="form-check-input correct-answer" type="checkbox" 
+                               name="correct_answer[]" value="${newIndex}">
+                        <label class="form-check-label ms-2">正確</label>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger remove-option">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        optionsContainer.insertAdjacentHTML('beforeend', newOptionHtml);
+        handleTypeChange();
+    });
+
+    // 移除選項
+    optionsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-option') || e.target.parentElement.classList.contains('remove-option')) {
+            const optionGroup = e.target.closest('.option-group');
+            const optionGroups = document.querySelectorAll('.option-group');
+            
+            if (optionGroups.length <= 2) {
+                alert('至少需要保留2個選項');
+                return;
+            }
+            
+            optionGroup.remove();
+            
+            // 重新編號
+            document.querySelectorAll('.option-group').forEach((group, index) => {
+                const numberSpan = group.querySelector('.input-group-text');
+                const checkbox = group.querySelector('.correct-answer');
+                numberSpan.textContent = index + 1;
+                checkbox.value = index;
+                group.dataset.index = index;
+            });
+            
+            handleTypeChange();
+        }
+    });
+
+    // 表單驗證
+    document.getElementById('questionForm').addEventListener('submit', function(e) {
+        const correctAnswers = document.querySelectorAll('.correct-answer:checked');
+        
+        if (correctAnswers.length === 0) {
+            e.preventDefault();
+            alert('請至少選擇一個正確答案');
+            return;
+        }
+
+        const isMultiple = multipleRadio.checked;
+        if (!isMultiple && correctAnswers.length > 1) {
+            e.preventDefault();
+            alert('單選題只能選擇一個正確答案');
+            return;
+        }
+    });
+
+    // 初始化題型處理
+    singleRadio.addEventListener('change', handleTypeChange);
+    multipleRadio.addEventListener('change', handleTypeChange);
+    handleTypeChange();
+});
+</script>
+
+<style>
+.form-check .border {
+    transition: all 0.2s ease;
+}
+.form-check input:checked + label {
+    color: #0d6efd;
+}
+.option-group .input-group-text {
+    min-width: 50px;
+    justify-content: center;
+}
+.remove-option {
+    border-left: none;
+}
+</style>
+{% endblock %}
