@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}測驗結果 - {{ quiz_title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+            <div class="mt-2">
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">返回首頁</a>
+            </div>
+        </div>
+        {% else %}
+        <!-- 成績總覽 -->
+        <div class="card shadow-lg mb-4">
+            <div class="card-header bg-success text-white text-center">
+                <h2 class="mb-0"><i class="fas fa-trophy me-2"></i>測驗結果</h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
+                            <h5>得分</h5>
+                            <span class="fs-2 fw-bold text-primary">{{ results.score_percentage }}%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                            <h5>等級</h5>
+                            <span class="fs-4 fw-bold 
+                                {% if results.score_percentage >= 90 %}text-success
+                                {% elif results.score_percentage >= 80 %}text-info
+                                {% elif results.score_percentage >= 70 %}text-warning
+                                {% else %}text-danger{% endif %}">
+                                {{ results.grade }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h5>正確題數</h5>
+                            <span class="fs-4 fw-bold">{{ results.correct_count }} / {{ results.total_questions }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                            <h5>用時</h5>
+                            <span class="fs-4 fw-bold">{{ results.duration_minutes }} 分鐘</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 進度條 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">答對率</label>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar 
+                            {% if results.score_percentage >= 90 %}bg-success
+                            {% elif results.score_percentage >= 80 %}bg-info
+                            {% elif results.score_percentage >= 70 %}bg-warning
+                            {% else %}bg-danger{% endif %}" 
+                            style="width: {{ results.score_percentage }}%">
+                            {{ results.score_percentage }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button class="btn btn-primary me-2" onclick="toggleDetails()">
+                        <i class="fas fa-list-alt me-1"></i>查看詳細解答
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-1"></i>返回首頁
+                    </a>
+                    <a href="{{ url_for('start_quiz') }}" class="btn btn-outline-success">
+                        <i class="fas fa-redo me-1"></i>重新測驗
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 詳細結果 -->
+        <div id="detailsSection" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>詳細解答</h4>
+                </div>
+                <div class="card-body">
+                    {% for result in results.detailed_results %}
+                    <div class="question-result mb-4 p-3 border rounded 
+                        {% if result.is_correct %}border-success bg-light{% else %}border-danger{% endif %}">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0">
+                                題目 {{ loop.index }}
+                                {% if result.type == 'multiple_choice' %}
+                                    <span class="badge bg-warning ms-2">多選題</span>
+                                {% else %}
+                                    <span class="badge bg-info ms-2">單選題</span>
+                                {% endif %}
+                            </h6>
+                            {% if result.is_correct %}
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-check me-1"></i>正確
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">
+                                    <i class="fas fa-times me-1"></i>錯誤
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="question-text mb-3">
+                            <strong>{{ result.question }}</strong>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">所有選項：</h6>
+                                <ul class="list-unstyled">
+                                    {% for option in result.options %}
+                                    <li class="mb-1">
+                                        {% if result.type == 'single_choice' %}
+                                            {% if option == result.correct_answer %}
+                                                <i class="fas fa-check-circle text-success me-2"></i>
+                                                <strong class="text-success">{{ option }}</strong> (正確答案)
+                                            {% elif option == result.user_answer %}
+                                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                                <span class="text-danger">{{ option }}</span> (您的選擇)
+                                            {% else %}
+                                                <i class="far fa-circle text-muted me-2"></i>
+                                                {{ option }}
+                                            {% endif %}
+                                        {% else %}
+                                            {% if option in result.correct_answers %}
+                                                <i class="fas fa-check-square text-success me-2"></i>
+                                                <strong class="text-success">{{ option }}</strong> (正確答案)
+                                            {% elif option in result.user_answer %}
+                                                {% if option in result.correct_answers %}
+                                                    <i class="fas fa-check-square text-success me-2"></i>
+                                                    <strong class="text-success">{{ option }}</strong> (您的正確選擇)
+                                                {% else %}
+                                                    <i class="fas fa-times-circle text-danger me-2"></i>
+                                                    <span class="text-danger">{{ option }}</span> (您的錯誤選擇)
+                                                {% endif %}
+                                            {% else %}
+                                                <i class="far fa-square text-muted me-2"></i>
+                                                {{ option }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6 class="text-info">您的答案：</h6>
+                                    {% if result.type == 'single_choice' %}
+                                        {% if result.user_answer %}
+                                            <span class="{% if result.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                                {{ result.user_answer }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">未作答</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if result.user_answer %}
+                                            {% for answer in result.user_answer %}
+                                                <span class="badge 
+                                                    {% if answer in result.correct_answers %}bg-success{% else %}bg-danger{% endif %} me-1">
+                                                    {{ answer }}
+                                                </span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">未作答</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <h6 class="text-success">正確答案：</h6>
+                                    {% if result.type == 'single_choice' %}
+                                        <strong class="text-success">{{ result.correct_answer }}</strong>
+                                    {% else %}
+                                        {% for answer in result.correct_answers %}
+                                            <span class="badge bg-success me-1">{{ answer }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDetails() {
+    const detailsSection = document.getElementById('detailsSection');
+    const btn = event.target;
+    
+    if (detailsSection.style.display === 'none') {
+        detailsSection.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-eye-slash me-1"></i>隱藏詳細解答';
+        btn.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        detailsSection.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-list-alt me-1"></i>查看詳細解答';
+    }
+}
+</script>
+{% endblock %}

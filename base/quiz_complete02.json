@@ -1,0 +1,635 @@
+{
+  "quiz": {
+    "title": "機器學習與AI服務測驗",
+    "description": "關於機器學習概念和Azure AI服務的測驗題目",
+    "questions": [
+      {
+        "id": 1,
+        "question": "選取正確完成句子的答案。 [答案選擇] 使用外掛程式為使用者提供從產生 AI 模型取得常見工作的協助的能力。",
+        "options": [
+          "副駕駛員",
+          "Language Understanding 解決方案",
+          "回答模型的問題",
+          "RESTful API 服務"
+        ],
+        "correct_answer": "副駕駛員",
+        "type": "single_choice"
+      },
+      {
+        "id": 2,
+        "question": "您可以在哪一層套用內容篩選來隱藏負責任產生 AI 解決方案的提示和回應？",
+        "options": [
+          "metaprompt 和 grounding",
+          "模型",
+          "安全系統",
+          "用戶體驗"
+        ],
+        "correct_answer": "安全系統",
+        "type": "single_choice"
+      },
+      {
+        "id": 3,
+        "question": "選取正確完成句子的答案。 [答案選擇] 可以根據自然語言輸入傳回回應，例如自然語言、影像或程序代碼。",
+        "options": [
+          "計算機視覺",
+          "深度學習",
+          "生成式 AI",
+          "機器學習",
+          "增強式學習"
+        ],
+        "correct_answer": "生成式 AI",
+        "type": "single_choice"
+      },
+      {
+        "id": 4,
+        "question": "選取正確完成句子的答案。 [答案選擇] 可用來識別產生 AI 模型響應的條件約束和樣式。",
+        "options": [
+          "數據地面",
+          "嵌入技術",
+          "系統訊息",
+          "標記化"
+        ],
+        "correct_answer": "系統訊息",
+        "type": "single_choice"
+      },
+      {
+        "id": 5,
+        "question": "根據 NIST AI 風險管理架構，開發負責任的產生 AI 解決方案時，要考慮的第一個階段為何？",
+        "options": [
+          "識別潛在的危害。",
+          "測量潛在危害的存在。",
+          "降低潛在危害。",
+          "作解決方案。"
+        ],
+        "correct_answer": "識別潛在的危害。",
+        "type": "single_choice"
+      },
+      {
+        "id": 6,
+        "question": "GPT 模型的範例有哪些兩項功能？ 每個正確答案都各自提供完整的解決方案。",
+        "options": [
+          "建立自然語言。",
+          "偵測語言的特定方言。",
+          "從影片即時產生隱藏式輔助字幕。",
+          "合成語音。",
+          "瞭解自然語言。"
+        ],
+        "correct_answers": [
+          "建立自然語言。",
+          "瞭解自然語言。"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 7,
+        "question": "哪三項功能是產生 AI 模型的影像產生功能的範例？ 每個正確答案都各自提供完整的解決方案。",
+        "options": [
+          "靜態影像的動畫",
+          "建立影像的變化",
+          "編輯影像",
+          "從影像擷取 RGB 值",
+          "建立新映像"
+        ],
+        "correct_answers": [
+          "建立影像的變化",
+          "編輯影像",
+          "建立新映像"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 8,
+        "question": "哪一種產生 AI 模型是用來根據自然語言提示產生影像？",
+        "options": [
+          "DALL-E",
+          "嵌入技術",
+          "GPT-3.5",
+          "GPT-4",
+          "耳語"
+        ],
+        "correct_answer": "DALL-E",
+        "type": "single_choice"
+      },
+      {
+        "id": 9,
+        "question": "選取正確完成句子的答案。 [答案選擇] 可以搜尋、分類及比較文字來源的相似度。",
+        "options": [
+          "數據地面",
+          "嵌入技術",
+          "機器學習",
+          "系統訊息"
+        ],
+        "correct_answer": "嵌入技術",
+        "type": "single_choice"
+      },
+      {
+        "id": 10,
+        "question": "您必須根據年齡和身體脂肪百分比來識別代表人類患糖尿病的機率的數值。 您應該使用哪種類型的機器學習模型？",
+        "options": [
+          "階層式叢集",
+          "線性回歸",
+          "羅吉斯回歸",
+          "多重線性回歸"
+        ],
+        "correct_answer": "羅吉斯回歸",
+        "type": "single_choice"
+      },
+      {
+        "id": 11,
+        "question": "哪一種機器學習演算法會根據該專案的功能預測與專案相關聯的數值標籤？",
+        "options": [
+          "分類",
+          "聚類",
+          "迴歸",
+          "監督"
+        ],
+        "correct_answer": "迴歸",
+        "type": "single_choice"
+      },
+      {
+        "id": 12,
+        "question": "哪一種機器學習演算法會尋找將數據集分割成群組的最佳方法，而不需要依賴定型和驗證卷標預測？",
+        "options": [
+          "分類",
+          "聚類",
+          "迴歸",
+          "監督"
+        ],
+        "correct_answer": "聚類",
+        "type": "single_choice"
+      },
+      {
+        "id": 13,
+        "question": "公司將在線行銷活動部署到社交媒體平臺，以推出新產品。 該公司想要使用機器學習來測量 Twitter 平臺上針對營銷活動做出貼文的用戶情緒。 這是哪種類型的機器學習服務？",
+        "options": [
+          "分類",
+          "聚類",
+          "數據轉換",
+          "迴歸"
+        ],
+        "correct_answer": "分類",
+        "type": "single_choice"
+      },
+      {
+        "id": 14,
+        "question": "您計劃使用機器學習來預測人類根據年齡和身體脂肪百分比發展糖尿病的可能性。 模型應該包含哪些專案？",
+        "options": [
+          "三個功能",
+          "三個標籤",
+          "兩個功能和一個標籤",
+          "兩個標籤和一個功能"
+        ],
+        "correct_answer": "兩個功能和一個標籤",
+        "type": "single_choice"
+      },
+      {
+        "id": 15,
+        "question": "應該滿足多重線性回歸模型的哪一個假設，以避免產生誤導性的預測？",
+        "options": [
+          "功能彼此相依。",
+          "功能彼此獨立。",
+          "卷標彼此相依。",
+          "標籤彼此獨立。",
+          "公司正使用機器學習來根據適當的房屋屬性預測房價。",
+          "針對機器學習模型，標籤是哪一個屬性？",
+          "房子的年齡",
+          "樓層空間大小",
+          "臥室數目",
+          "房子的價格"
+        ],
+        "correct_answer": "功能彼此獨立。",
+        "type": "single_choice"
+      },
+      {
+        "id": 16,
+        "question": "您必須建立自動化機器學習 （自動化 ML） 模型。 您應該先在 Azure Machine Learning Studio 中建立哪一個資源？",
+        "options": [
+          "數據集",
+          "工作區",
+          "Azure 容器執行個體",
+          "Azure Kubernetes Service （AKS） 叢集"
+        ],
+        "correct_answer": "數據集",
+        "type": "single_choice"
+      },
+      {
+        "id": 17,
+        "question": "您必須使用 Azure Machine Learning 來定型回歸模型。 您應該在 Machine Learning Studio 中建立什麼？",
+        "options": [
+          "作業",
+          "工作區",
+          "Azure 容器執行個體",
+          "Azure Kubernetes Service （AKS） 叢集"
+        ],
+        "correct_answer": "作業",
+        "type": "single_choice"
+      },
+      {
+        "id": 18,
+        "question": "您必須使用 Azure Machine Learning 設計工具來定型機器學習模型。 您應該先在 Machine Learning 設計工具中執行什麼動作？",
+        "options": [
+          "新增數據集。",
+          "新增訓練模組。",
+          "建立 管線。",
+          "部署服務。"
+        ],
+        "correct_answer": "建立 管線。",
+        "type": "single_choice"
+      },
+      {
+        "id": 19,
+        "question": "您可以在 Azure Machine Learning Studio 中使用自動化機器學習（自動化 ML）來定型回歸模型。 您可以檢閱最佳模型摘要。 您必須發佈模型供其他人從因特網使用。 您接下來應該怎麼做？",
+        "options": [
+          "建立計算叢集。",
+          "將模型部署至端點。",
+          "將數據分割成定型和驗證數據集。",
+          "測試已部署的服務。"
+        ],
+        "correct_answer": "將模型部署至端點。",
+        "type": "single_choice"
+      },
+      {
+        "id": 20,
+        "question": "什麼是 Azure Machine Learning 設計工具中訓練模型的未監督機器學習演算法模組？",
+        "options": [
+          "分類",
+          "K-Means 叢集",
+          "線性迴歸",
+          "將資料標準化"
+        ],
+        "correct_answer": "K-Means 叢集",
+        "type": "single_choice"
+      },
+      {
+        "id": 21,
+        "question": "哪一種自然語言處理（NLP）技術會將值指派給植物和花卉等字組，以便它們彼此比飛機等單字更接近？",
+        "options": [
+          "頻率分析",
+          "lemmatization",
+          "N-克",
+          "矢量化"
+        ],
+        "correct_answer": "矢量化",
+        "type": "single_choice"
+      },
+      {
+        "id": 22,
+        "question": "自然語言處理中的語音合成哪個部分（NLP）涉及將文字分解成個別單字，讓每個單字都能被指派語音音效？",
+        "options": [
+          "lemmatization",
+          "關鍵片語擷取",
+          "tokenization",
+          "轉錄"
+        ],
+        "correct_answer": "tokenization",
+        "type": "single_choice"
+      },
+      {
+        "id": 23,
+        "question": "哪兩個 Azure AI 服務功能可用來在多種語言之間啟用文字到文字和語音轉換文字？ 每個正確答案都代表解決方案的一部分。",
+        "options": [
+          "對話式語言理解",
+          "關鍵片語擷取",
+          "語言偵測",
+          "語音服務",
+          "翻譯工具服務"
+        ],
+        "correct_answers": [
+          "語音服務",
+          "翻譯工具服務"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 24,
+        "question": "Azure AI Services 的哪兩個功能可讓您識別支援問題數據的問題，以及識別提及的任何人員與產品？ 每個正確答案都代表解決方案的一部分。",
+        "options": [
+          "Azure AI Bot Service",
+          "對話式語言理解",
+          "關鍵片語擷取",
+          "具名實體辨識",
+          "Azure AI 語音服務"
+        ],
+        "correct_answers": [
+          "關鍵片語擷取",
+          "具名實體辨識"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 25,
+        "question": "Azure AI Translator 服務支援哪種類型的翻譯？",
+        "options": [
+          "語音轉換語音",
+          "語音轉換文字",
+          "文字到語音轉換",
+          "文字到文字"
+        ],
+        "correct_answer": "文字到文字",
+        "type": "single_choice"
+      },
+      {
+        "id": 26,
+        "question": "哪一個 Azure 資源可透過單一端點和驗證密鑰直接存取 Azure AI Translator 和 Azure AI 語音服務？",
+        "options": [
+          "Azure AI Bot Service",
+          "Azure AI 服務",
+          "Azure Machine Learning",
+          "Azure AI 語言服務"
+        ],
+        "correct_answer": "Azure AI 服務",
+        "type": "single_choice"
+      },
+      {
+        "id": 27,
+        "question": "哪三項功能是 Azure AI 語音服務的元素？ 每個正確答案都各自提供完整的解決方案。",
+        "options": [
+          "檔翻譯",
+          "語言識別",
+          "說話者辨識",
+          "文本翻譯",
+          "語音助理"
+        ],
+        "correct_answers": [
+          "語言識別",
+          "說話者辨識",
+          "語音助理"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 28,
+        "question": "Azure AI Translator 服務的哪個功能僅適用於自定義翻譯工具？",
+        "options": [
+          "檔翻譯",
+          "使用字典進行模型定型",
+          "說話者辨識",
+          "文本翻譯"
+        ],
+        "correct_answer": "使用字典進行模型定型",
+        "type": "single_choice"
+      },
+      {
+        "id": 29,
+        "question": "使用 Azure AI Service for Language 時，您應該使用什麼來在線提供從文字擷取的實體相關信息？",
+        "options": [
+          "實體連結",
+          "關鍵片語擷取",
+          "具名實體辨識",
+          "文本翻譯"
+        ],
+        "correct_answer": "實體連結",
+        "type": "single_choice"
+      },
+      {
+        "id": 30,
+        "question": "哪一種人工智慧（AI）技術可作為新式影像分類解決方案的基礎？",
+        "options": [
+          "語意分割",
+          "深度學習",
+          "線性回歸",
+          "多重線性回歸"
+        ],
+        "correct_answer": "深度學習",
+        "type": "single_choice"
+      },
+      {
+        "id": 31,
+        "question": "哪一種電腦視覺解決方案可讓您根據相片識別個人的年齡？",
+        "options": [
+          "臉部偵測",
+          "影像分類",
+          "物件偵測",
+          "語意分割"
+        ],
+        "correct_answer": "臉部偵測",
+        "type": "single_choice"
+      },
+      {
+        "id": 32,
+        "question": "哪個電腦視覺服務在其輸出中提供周框座標？",
+        "options": [
+          "影像分析",
+          "影像分類",
+          "物件偵測",
+          "語意分割"
+        ],
+        "correct_answer": "物件偵測",
+        "type": "single_choice"
+      },
+      {
+        "id": 33,
+        "question": "哪一個程式可讓您使用物件偵測？",
+        "options": [
+          "分析新聞文章的情感",
+          "從手稿中擷取文字",
+          "授與員工對安全建築物的存取權",
+          "在欄位中追蹤牲畜"
+        ],
+        "correct_answer": "在欄位中追蹤牲畜",
+        "type": "single_choice"
+      },
+      {
+        "id": 34,
+        "question": "您有一組影像。 每個影像顯示一種類型的骨骨折。 什麼可讓您識別不同 X 光影像中的骨折？",
+        "options": [
+          "交談人工智慧 （AI）",
+          "臉部偵測",
+          "影像分類",
+          "物件偵測"
+        ],
+        "correct_answer": "影像分類",
+        "type": "single_choice"
+      },
+      {
+        "id": 35,
+        "question": "哪些可用於可掃描手寫簽章的出席系統？",
+        "options": [
+          "臉部偵測",
+          "影像分類",
+          "物件偵測",
+          "光學字元辨識 (OCR)"
+        ],
+        "correct_answer": "光學字元辨識 (OCR)",
+        "type": "single_choice"
+      },
+      {
+        "id": 36,
+        "question": "計算機視覺的哪個功能牽涉到將影像與摘要影像屬性的元數據產生關聯？",
+        "options": [
+          "分類",
+          "內容組織",
+          "偵測影像類型",
+          "標記"
+        ],
+        "correct_answer": "標記",
+        "type": "single_choice"
+      },
+      {
+        "id": 37,
+        "question": "Azure AI 視覺可消除機器學習程式的哪三個部分？ 每個正確答案都代表解決方案的一部分。",
+        "options": [
+          "Azure 資源布建",
+          "選擇模型",
+          "評估模型",
+          "推斷",
+          "定型模型"
+        ],
+        "correct_answers": [
+          "選擇模型",
+          "評估模型",
+          "定型模型"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 38,
+        "question": "使用 Azure AI 視覺服務支援哪兩個特製化領域模型？ 每個正確答案都各自提供完整的解決方案。",
+        "options": [
+          "動物",
+          "汽車",
+          "名人",
+          "地標",
+          "植物"
+        ],
+        "correct_answers": [
+          "名人",
+          "地標"
+        ],
+        "type": "multiple_choice"
+      },
+      {
+        "id": 39,
+        "question": "Azure AI 視覺影像描述工作所傳回的每個片語會包含哪些額外資訊？",
+        "options": [
+          "周框方塊座標",
+          "信賴分數",
+          "端點",
+          "鑰匙"
+        ],
+        "correct_answer": "信賴分數",
+        "type": "single_choice"
+      },
+      {
+        "id": 40,
+        "question": "哪些自然語言處理 （NLP） 工作負載可用來產生即時簡報的隱藏式輔助字幕文字？",
+        "options": [
+          "Azure AI 語音",
+          "交談語言理解 （CLU）",
+          "回答模型的問題",
+          "文字分析"
+        ],
+        "correct_answer": "Azure AI 語音",
+        "type": "single_choice"
+      },
+      {
+        "id": 41,
+        "question": "哪一種服務提供對話式人工智慧（AI）的平臺？",
+        "options": [
+          "Azure AI Bot Service",
+          "Azure AI 文件智慧服務",
+          "Azure AI 影像辨識",
+          "Azure AI 翻譯器"
+        ],
+        "correct_answer": "Azure AI Bot Service",
+        "type": "single_choice"
+      },
+      {
+        "id": 42,
+        "question": "哪些 AI 服務可以整合到聊天應用程式中，並以文字形式產生內容？",
+        "options": [
+          "Azure AI 語言",
+          "Azure AI 計量建議程式",
+          "Azure AI 影像辨識",
+          "Azure OpenAI"
+        ],
+        "correct_answer": "Azure OpenAI",
+        "type": "single_choice"
+      },
+      {
+        "id": 43,
+        "question": "您正在探索可改善員工文件搜尋和編製索引服務的解決方案。 您需要人工智慧 （AI） 搜尋解決方案，其中包含各種文件類型中的搜尋文字，例如影像。 這是哪種類型的 AI 工作負載？",
+        "options": [
+          "語意分割",
+          "計算機視覺",
+          "交談式 AI",
+          "數據挖掘"
+        ],
+        "correct_answer": "數據挖掘",
+        "type": "single_choice"
+      },
+      {
+        "id": 44,
+        "question": "哪個負責任人工智慧（AI）原則的目標是確保 AI 解決方案有利於社會的所有部分，無論性別或種族為何？",
+        "options": [
+          "問責",
+          "包容",
+          "隱私權和安全性",
+          "可靠性和安全性"
+        ],
+        "correct_answer": "包容",
+        "type": "single_choice"
+      },
+      {
+        "id": 45,
+        "question": "哪個負責任人工智慧原則 （AI） 定義符合 AI 解決方案道德和法律標準的治理和組織原則架構？",
+        "options": [
+          "問責",
+          "公平",
+          "包容",
+          "透明度"
+        ],
+        "correct_answer": "問責",
+        "type": "single_choice"
+      },
+      {
+        "id": 46,
+        "question": "實作符合商務貸款核准資格的 AI 解決方案時，哪一項負責任人工智慧（AI）原則扮演主要角色？",
+        "options": [
+          "問責",
+          "公平",
+          "包容",
+          "安全性"
+        ],
+        "correct_answer": "公平",
+        "type": "single_choice"
+      },
+      {
+        "id": 47,
+        "question": "在 AI 系統的設計中會套用哪一項負責任人工智慧原則，以確保使用者瞭解 AI 的限制和限制？",
+        "options": [
+          "公平",
+          "包容",
+          "隱私權和安全性",
+          "透明度"
+        ],
+        "correct_answer": "透明度",
+        "type": "single_choice"
+      },
+      {
+        "id": 48,
+        "question": "哪一項負責任人工智慧（AI）原則可確保 AI 系統符合其必須遵守的任何法律和道德標準？",
+        "options": [
+          "問責",
+          "公平",
+          "包容",
+          "隱私權和安全性"
+        ],
+        "correct_answer": "問責",
+        "type": "single_choice"
+      },
+      {
+        "id": 49,
+        "question": "一家公司目前正在開發無人駕駛的農業車輛，以幫助收穫作物。 這些車輛將與在作物田裡工作的人一起部署，因此，公司將需要進行強大的測試。 在此情況下，哪一項負責任人工智慧（AI）原則最為重要？",
+        "options": [
+          "問責",
+          "包容",
+          "可靠性和安全性",
+          "透明度"
+        ],
+        "correct_answer": "可靠性和安全性",
+        "type": "single_choice"
+      }
+    ]
+  }
+}

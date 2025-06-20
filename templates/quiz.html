@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}進行測驗 - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-2">
+        <!-- 側邊欄 - 進度信息 -->
+        <div class="card sticky-top">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>測驗進度</h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <div class="fs-3 fw-bold text-primary">{{ question_number }}</div>
+                    <div class="text-muted">/ {{ total_questions }}</div>
+                </div>
+                <div class="progress mb-2">
+                    <div class="progress-bar" style="width: {{ (question_number / total_questions * 100)|round }}%"></div>
+                </div>
+                <small class="text-muted">{{ ((question_number / total_questions * 100)|round) }}% 完成</small>
+            </div>
+        </div>
+
+        <!-- 測驗信息 -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6><i class="fas fa-info-circle me-2"></i>測驗信息</h6>
+                <div class="small">
+                    <div class="mb-1">
+                        <strong>開始時間:</strong><br>
+                        {{ quiz_info.start_time if quiz_info.start_time else '剛才' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-10">
+        <!-- 主要測驗區域 -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        題目 {{ question_number }}
+                        {% if question.type == 'multiple' %}
+                            <span class="badge bg-warning ms-2">多選題</span>
+                        {% else %}
+                            <span class="badge bg-success ms-2">單選題</span>
+                        {% endif %}
+                    </h5>
+                    
+                    {% if question.category %}
+                    <span class="badge bg-secondary">{{ question.category }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <form id="answerForm" method="POST" action="{{ url_for('quiz.submit_answer') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    
+                    <!-- 題目文字 -->
+                    <div class="question-text mb-4">
+                        <p class="fs-5 lh-base">{{ question.question }}</p>
+                    </div>
+
+                    <!-- 選項 -->
+                    <div class="options mb-4">
+                        {% if question.type == 'single' %}
+                            <!-- 單選題 -->
+                            {% for option in question.options %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" 
+                                       name="answer" 
+                                       id="option_{{ loop.index0 }}" 
+                                       value="{{ loop.index0 }}">
+                                <label class="form-check-label fs-6" for="option_{{ loop.index0 }}">
+                                    <span class="me-2 fw-bold">{{ loop.index|upper|replace('1','A')|replace('2','B')|replace('3','C')|replace('4','D')|replace('5','E') }}.</span>
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- 多選題 -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>多選題：</strong>請選擇所有正確的答案
+                            </div>
+                            {% for option in question.options %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="answer" 
+                                       id="option_{{ loop.index0 }}" 
+                                       value="{{ loop.index0 }}">
+                                <label class="form-check-label fs-6" for="option_{{ loop.index0 }}">
+                                    <span class="me-2 fw-bold">{{ loop.index|upper|replace('1','A')|replace('2','B')|replace('3','C')|replace('4','D')|replace('5','E') }}.</span>
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 操作按鈕 -->
+                    <div class="d-flex justify-content-between">
+                        {% if question_number > 1 %}
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToPrevious()">
+                            <i class="fas fa-arrow-left me-2"></i>上一題
+                        </button>
+                        {% else %}
+                        <div></div>
+                        {% endif %}
+
+                        <div>
+                            {% if question_number < total_questions %}
+                            <button type="submit" class="btn btn-primary">
+                                下一題<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>完成測驗
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 説明提示 -->
+        <div class="alert alert-light mt-3">
+            <small class="text-muted">
+                <i class="fas fa-lightbulb me-2"></i>
+                {% if question.type == 'single' %}
+                請選擇一個最適合的答案，然後點擊「下一題」繼續。
+                {% else %}
+                這是多選題，請選擇所有正確的答案，然後點擊「下一題」繼續。
+                {% endif %}
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-label {
+    cursor: pointer;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 100%;
+    display: block;
+}
+
+.form-check-label:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+}
+
+.form-check-input:checked + .form-check-label {
+    background-color: #e3f2fd;
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.question-text p {
+    line-height: 1.8;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sticky-top {
+    top: 20px;
+}
+</style>
+
+<script>
+// 表單提交處理
+document.getElementById('answerForm').addEventListener('submit', function(e) {
+    const selected = document.querySelector('input[name="answer"]:checked');
+    
+    if (!selected) {
+        e.preventDefault();
+        alert('請選擇一個答案！');
+        return false;
+    }
+    
+    // 禁用提交按鈕防止重複提交
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>提交中...';
+    submitBtn.disabled = true;
+    
+    // 如果用戶在3秒內沒有響應，重新啟用按鈕
+    setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 3000);
+});
+
+// 返回上一題（如果需要實現）
+function goToPrevious() {
+    // 這裡可以實現返回上一題的邏輯
+    alert('返回上一題功能暫未實現');
+}
+
+// 鍵盤快速鍵支援
+document.addEventListener('keydown', function(e) {
+    // 按數字鍵1-5選擇選項
+    if (e.key >= '1' && e.key <= '5') {
+        const optionIndex = parseInt(e.key) - 1;
+        const option = document.getElementById(`option_${optionIndex}`);
+        if (option) {
+            option.checked = !option.checked;
+        }
+    }
+    
+    // 按Enter提交
+    if (e.key === 'Enter' && !e.shiftKey) {
+        const form = document.getElementById('answerForm');
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (selected) {
+            form.submit();
+        }
+    }
+});
+
+// 頁面載入完成後的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 聚焦到第一個選項以便鍵盤操作
+    const firstOption = document.getElementById('option_0');
+    if (firstOption) {
+        firstOption.focus();
+    }
+});
+</script>
+{% endblock %}

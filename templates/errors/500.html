@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}伺服器錯誤 (500) - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="error-page">
+            <div class="error-icon mb-4">
+                <i class="fas fa-exclamation-triangle fa-5x text-danger"></i>
+            </div>
+            <h1 class="display-1 fw-bold text-danger">500</h1>
+            <h2 class="mb-3">內部伺服器錯誤</h2>
+            <p class="text-muted mb-4">
+                抱歉，伺服器發生了內部錯誤。<br>
+                我們正在努力修復這個問題，請稍後再試。
+            </p>
+            <div class="d-grid gap-2 d-md-block">
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>返回首頁
+                </a>
+                <button class="btn btn-outline-secondary" onclick="location.reload()">
+                    <i class="fas fa-redo me-2"></i>重新載入
+                </button>
+            </div>
+            
+            {% if config.DEBUG %}
+            <div class="mt-4 text-start">
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-bug me-2"></i>除錯信息：</h6>
+                    <small class="text-muted">{{ error_message if error_message else '未提供詳細錯誤信息' }}</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 60px 0;
+}
+
+.error-icon {
+    opacity: 0.5;
+}
+
+.display-1 {
+    font-size: 6rem;
+    line-height: 1;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}頁面未找到 (404) - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="error-page">
+            <div class="error-icon mb-4">
+                <i class="fas fa-search fa-5x text-muted"></i>
+            </div>
+            <h1 class="display-1 fw-bold text-primary">404</h1>
+            <h2 class="mb-3">頁面未找到</h2>
+            <p class="text-muted mb-4">
+                抱歉，您要尋找的頁面不存在。<br>
+                可能是連結已過期或頁面已被移動。
+            </p>
+            <div class="d-grid gap-2 d-md-block">
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>返回首頁
+                </a>
+                <button class="btn btn-outline-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-2"></i>返回上頁
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 60px 0;
+}
+
+.error-icon {
+    opacity: 0.5;
+}
+
+.display-1 {
+    font-size: 6rem;
+    line-height: 1;
+}
+</style>
+{% endblock %}

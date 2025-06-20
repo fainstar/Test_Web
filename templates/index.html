@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz_title }} - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h1 class="mb-0">
+                    <i class="fas fa-brain me-2"></i>{{ quiz_title }}
+                </h1>
+            </div>
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <p class="lead">{{ quiz_description }}</p>
+                </div>
+
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-list fa-2x text-primary mb-2"></i>
+                            <h5>總題數</h5>
+                            <span class="badge bg-primary fs-6">{{ total_questions }} 題</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-dot-circle fa-2x text-success mb-2"></i>
+                            <h5>單選題</h5>
+                            <span class="badge bg-success fs-6">{{ single_choice }} 題</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-check-square fa-2x text-warning mb-2"></i>
+                            <h5>多選題</h5>
+                            <span class="badge bg-warning fs-6">{{ multiple_choice }} 題</span>
+                        </div>
+                    </div>
+                </div>                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>測驗說明：</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>請仔細閱讀每個題目</li>
+                        <li>單選題請選擇一個最適合的答案</li>
+                        <li>多選題可以選擇多個正確答案</li>
+                        <li>完成所有題目後提交測驗</li>
+                    </ul>
+                </div>
+
+                <!-- 測驗配置選項 -->
+                <div class="quiz-config mb-4">
+                    <h5><i class="fas fa-sliders-h me-2"></i>測驗配置</h5>
+                    <form id="quizConfigForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="questionCount" class="form-label">題目數量：</label>
+                                <select id="questionCount" class="form-select">
+                                    <option value="5">5 題</option>
+                                    <option value="10" selected>10 題</option>
+                                    <option value="15">15 題</option>
+                                    <option value="20">20 題</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="difficulty" class="form-label">難度：</label>                                <select id="difficulty" class="form-select">
+                                    <option value="">全部</option>
+                                    {% if question_stats.difficulty_stats %}
+                                    {% for difficulty in question_stats.difficulty_stats.keys() %}
+                                    <option value="{{ difficulty }}">{{ difficulty }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="category" class="form-label">分類：</label>                                <select id="category" class="form-select">
+                                    <option value="">全部</option>
+                                    {% if question_stats.category_stats %}
+                                    {% for category in question_stats.category_stats.keys() %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 進階選項 -->
+                        <div class="advanced-options mt-3" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">題型：</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="singleChoice" value="single_choice" checked>
+                                        <label class="form-check-label" for="singleChoice">單選題</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="multipleChoice" value="multiple_choice" checked>
+                                        <label class="form-check-label" for="multipleChoice">多選題</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="shuffleOptions" checked>
+                                        <label class="form-check-label" for="shuffleOptions">
+                                            打亂選項順序
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="mixedRatio">
+                                        <label class="form-check-label" for="mixedRatio">
+                                            平衡題型比例
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAdvanced()">
+                                <i class="fas fa-cog me-1"></i>進階選項
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 測驗按鈕組 -->
+                <div class="quiz-buttons text-center">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <button onclick="startQuiz('basic')" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-play me-2"></i>
+                                快速開始
+                                <small class="d-block">標準隨機測驗</small>
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button onclick="startQuiz('advanced')" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-magic me-2"></i>
+                                智能測驗
+                                <small class="d-block">進階隨機配置</small>
+                            </button>
+                        </div>                        <div class="col-md-4">
+                            <a href="{{ url_for('admin.index') }}" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-sliders-h me-2"></i>
+                                自定義測驗
+                                <small class="d-block">完全自定義配置</small>
+                            </a>
+                        </div>
+                    </div>
+                      <div class="mt-3">
+                        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-cogs me-2"></i>管理面板
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.quiz-config {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.quiz-config h5 {
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.quiz-buttons .btn {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.quiz-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.quiz-buttons small {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.advanced-options {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.form-check {
+    margin-bottom: 5px;
+}
+
+.btn-toggle {
+    border: 1px solid #007bff;
+    background: transparent;
+    color: #007bff;
+}
+
+.btn-toggle:hover {
+    background: #007bff;
+    color: white;
+}
+</style>
+
+<script>
+function toggleAdvanced() {
+    const advancedOptions = document.querySelector('.advanced-options');
+    const toggleBtn = event.target;
+    
+    if (advancedOptions.style.display === 'none') {
+        advancedOptions.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fas fa-cog me-1"></i>隱藏進階選項';
+    } else {
+        advancedOptions.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-cog me-1"></i>進階選項';
+    }
+}
+
+function collectQuizConfig() {
+    const count = document.getElementById('questionCount').value;
+    const difficulty = document.getElementById('difficulty').value;
+    const category = document.getElementById('category').value;
+    
+    const config = {
+        count: count,
+        difficulty: difficulty || undefined,
+        category: category || undefined
+    };
+    
+    // 進階選項
+    const singleChoice = document.getElementById('singleChoice').checked;
+    const multipleChoice = document.getElementById('multipleChoice').checked;
+    const shuffleOptions = document.getElementById('shuffleOptions').checked;
+    const mixedRatio = document.getElementById('mixedRatio').checked;
+    
+    if (!singleChoice || !multipleChoice) {
+        config.types = [];
+        if (singleChoice) config.types.push('single_choice');
+        if (multipleChoice) config.types.push('multiple_choice');
+    }
+    
+    config.shuffle = shuffleOptions;
+    
+    if (mixedRatio) {
+        config.single_ratio = 0.5;
+        config.multiple_ratio = 0.5;
+    }
+    
+    return config;
+}
+
+function startQuiz(mode) {
+    const config = collectQuizConfig();
+    let url;    if (mode === 'basic') {
+        // 基本測驗：使用原來的路由
+        url = new URL('{{ url_for("quiz.start_quiz") }}', window.location.origin);
+        if (config.count) url.searchParams.append('count', config.count);
+        if (config.difficulty) url.searchParams.append('difficulty', config.difficulty);
+        if (config.category) url.searchParams.append('category', config.category);
+    } else if (mode === 'advanced') {
+        // 進階測驗：使用新的進階路由
+        url = new URL('{{ url_for("quiz.start_quiz") }}', window.location.origin);
+        
+        Object.entries(config).forEach(([key, value]) => {
+            if (value !== undefined) {
+                if (Array.isArray(value)) {
+                    value.forEach(v => url.searchParams.append(key, v));
+                } else {
+                    url.searchParams.append(key, value);
+                }
+            }
+        });
+    }
+    
+    // 顯示載入提示
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>準備中...';
+    button.disabled = true;
+    
+    // 跳轉到測驗頁面
+    window.location.href = url.toString();
+}
+
+// 隨機單題功能（供其他頁面使用）
+function getRandomQuestion(criteria = {}) {
+    const url = new URL('{{ url_for("api.get_random_questions") }}', window.location.origin);
+    
+    Object.entries(criteria).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+            if (Array.isArray(value)) {
+                value.forEach(v => url.searchParams.append(key, v));
+            } else {
+                url.searchParams.append(key, value);
+            }
+        }
+    });
+    
+    return fetch(url)
+        .then(response => response.json())
+        .catch(error => {
+            console.error('獲取隨機題目失敗:', error);
+            return { error: '無法獲取題目' };
+        });
+}
+
+// 驗證配置
+function validateConfig() {
+    const singleChoice = document.getElementById('singleChoice').checked;
+    const multipleChoice = document.getElementById('multipleChoice').checked;
+    
+    if (!singleChoice && !multipleChoice) {
+        alert('請至少選擇一種題型！');
+        return false;
+    }
+    
+    return true;
+}
+
+// 監聽配置變更
+document.addEventListener('DOMContentLoaded', function() {
+    const configInputs = document.querySelectorAll('#quizConfigForm input, #quizConfigForm select');
+    
+    configInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // 可以在這裡添加即時預覽功能
+            console.log('配置已更新:', collectQuizConfig());
+        });
+    });
+});
+</script>
+{% endblock %}
