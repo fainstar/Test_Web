@@ -18,19 +18,32 @@ def init_database():
     print("🔄 正在初始化數據庫...")
     
     config = get_config()
+    db_path = config.DATABASE_PATH
     
-    # 初始化模型（會自動創建表）
-    question_model = Question(config.DATABASE_PATH)
-    session_model = QuizSession(config.DATABASE_PATH)
+    # 確保數據庫目錄存在
+    db_dir = Path(db_path).parent
+    if db_dir != Path('.'):
+        db_dir.mkdir(parents=True, exist_ok=True)
+        print(f"📁 數據庫目錄: {db_dir}")
     
-    print("✅ 數據庫表結構創建完成")
+    print(f"🗄️ 數據庫路徑: {db_path}")
     
-    # 檢查是否需要導入初始數據
-    base_dir = Path(__file__).parent / 'base'
-    if base_dir.exists():
-        import_initial_data(question_model, base_dir)
-    
-    print("🎉 數據庫初始化完成！")
+    try:
+        # 初始化模型（會自動創建表）
+        question_model = Question(db_path)
+        session_model = QuizSession(db_path)
+        
+        print("✅ 數據庫表結構創建完成")
+        
+        # 檢查是否需要導入初始數據
+        base_dir = Path(__file__).parent / 'base'
+        if base_dir.exists():
+            import_initial_data(question_model, base_dir)
+        
+        print("🎉 數據庫初始化完成！")
+    except Exception as e:
+        print(f"❌ 數據庫初始化失敗: {e}")
+        raise
 
 def import_initial_data(question_model, base_dir):
     """導入初始數據"""

@@ -4,6 +4,7 @@
 """
 import os
 from datetime import timedelta
+from pathlib import Path
 
 class Config:
     """基礎配置類"""
@@ -13,6 +14,14 @@ class Config:
     
     # 數據庫配置
     DATABASE_PATH = os.environ.get('DATABASE_PATH') or 'quiz_database.db'
+    
+    @classmethod
+    def init_app(cls, app):
+        """初始化應用程式配置"""
+        # 確保數據庫目錄存在
+        db_path = Path(cls.DATABASE_PATH)
+        if db_path.parent != Path('.'):
+            db_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Session配置
     PERMANENT_SESSION_LIFETIME = timedelta(hours=2)

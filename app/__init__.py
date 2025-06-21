@@ -17,14 +17,21 @@ def create_app(config_name=None):
         Flask: 配置好的Flask應用程式實例    """
     app = Flask(__name__, 
                 template_folder='../templates',
-                static_folder='../static')
-    
-    # 載入配置
+                static_folder='../static')    # 載入配置
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
     
     config_class = get_config()
     app.config.from_object(config_class)
+    
+    # 初始化配置並確保數據庫路徑存在
+    config_class.init_app(app)
+    
+    # 確保數據庫目錄存在（額外保障）
+    from pathlib import Path
+    db_path = Path(app.config['DATABASE_PATH'])
+    if db_path.parent != Path('.'):
+        db_path.parent.mkdir(parents=True, exist_ok=True)
     
     # 註冊藍圖
     register_blueprints(app)

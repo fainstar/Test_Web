@@ -10,7 +10,9 @@ app = create_app()
 
 if __name__ == '__main__':
     # 從環境變數獲取配置，Docker友好設定
-    debug_mode = os.environ.get('FLASK_DEBUG', os.environ.get('FLASK_ENV', 'production') == 'development').lower() == 'true'
+    flask_debug = os.environ.get('FLASK_DEBUG', '').lower()
+    flask_env = os.environ.get('FLASK_ENV', 'production')
+    debug_mode = flask_debug == 'true' or flask_env == 'development'
     port = int(os.environ.get('PORT', os.environ.get('APP_PORT', 5000)))
     host = os.environ.get('HOST', os.environ.get('APP_HOST', '0.0.0.0'))  # Docker中監聽所有介面
     

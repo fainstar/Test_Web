@@ -5,6 +5,7 @@
 import sqlite3
 import json
 from datetime import datetime
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 class BaseModel:
@@ -12,6 +13,10 @@ class BaseModel:
     
     def __init__(self, db_path: str):
         self.db_path = db_path
+        # 確保數據庫目錄存在
+        db_path_obj = Path(db_path)
+        if db_path_obj.parent != Path('.'):
+            db_path_obj.parent.mkdir(parents=True, exist_ok=True)
     
     def get_connection(self) -> sqlite3.Connection:
         """獲取數據庫連接"""
