@@ -1,53 +1,122 @@
-# 線上測驗系統 - AI Agent 技術文件
+# 線上測驗系統 - 技術文件 v2.0
 
-本文件為AI agent提供系統架構、數據流、關鍵技術點與維護重點的技術參考。
+本文件提供系統架構、數據流、關鍵技術點與維護重點的完整技術參考。
 
-## 系統架構概覽
+## 🏗️ 系統架構概覽
 
 ### 技術棧
-- **後端**：Python 3.7+ + Flask 3.0.0
-- **資料庫**：SQLite 3 (單檔案資料庫)
-- **前端**：HTML5 + CSS3 + JavaScript (原生)
+- **後端**：Python 3.10+ + Flask 3.0.0
+- **資料庫**：SQLite 3 (單檔案資料庫，支援高並發)
+- **前端**：HTML5 + CSS3 + JavaScript (現代化響應式設計)
 - **哈希演算法**：SHA-256 (題目去重)
+- **架構模式**：MVC分層架構
+- **API設計**：RESTful，支援JSON格式
 
-### 核心模組
+### 🔧 核心模組架構
 ```
-app.py                 # Flask主應用，路由與業務邏輯
-database_manager.py    # 資料庫管理，CRUD操作，hash去重
-import_base_questions.py # 批量導入腳本
+app/
+├── __init__.py              # 應用工廠，CSRF保護配置
+├── models/                  # 數據模型層
+│   ├── question.py         # 題目模型，支援多選題
+│   └── quiz_session.py     # 測驗會話模型
+├── services/               # 業務邏輯層
+│   ├── question_service.py # 題目服務，智能轉換
+│   └── quiz_service.py     # 測驗服務，判分邏輯
+├── routes/                 # 路由控制層
+│   ├── main.py            # 主要路由
+│   ├── quiz.py            # 測驗路由
+│   ├── admin.py           # 管理路由
+│   └── api.py             # API路由，CSRF已優化
+└── utils/                 # 工具模組
+    ├── validators.py      # 數據驗證
+    ├── error_handlers.py  # 錯誤處理
+    └── context_processors.py # 上下文處理
 ```
 
-## 資料流與架構
+## 📊 數據流與架構
 
-### 1. 題目導入流程
+### 1. 多選題導入流程 (已優化)
 ```
-JSON檔案 → hash計算 → 重複檢查 → 資料庫插入 → 索引更新
+JSON檔案 → 格式標準化 → 文字答案轉索引 → hash計算 → 重複檢查 → 資料庫插入
 ```
 
 **關鍵實作**：
-- `database_manager.py::calculate_question_hash()` - SHA-256雜湊計算
-- `database_manager.py::add_question()` - 自動去重插入
-- `database_manager.py::import_questions_from_json()` - 批量處理
+- `question_service.py::normalize_question_format()` - 多格式JSON支援
+- `init_db.py::normalize_question_format()` - 文字答案自動轉索引
+- `question.py::add()` - SHA-256雜湊計算與去重
+- `question.py::_format_question()` - 多選題正確答案處理
 
-### 2. 測驗執行流程
+### 2. 測驗執行流程 (多選題完整支援)
 ```
-隨機抽題 → Session儲存 → 逐題顯示 → 答案收集 → 成績計算 → 結果展示
+隨機抽題 → Session儲存 → 逐題顯示 → 答案收集 → 多選題判分 → 結果展示
 ```
 
 **關鍵實作**：
-- `app.py::/start_quiz` - 隨機抽題並初始化session
-- `app.py::/quiz/<int:question_id>` - 題目顯示與答案處理
-- `app.py::/results` - 成績計算與統計
+- `quiz_service.py::create_quiz_session()` - 隨機抽題算法
+- `quiz_service.py::submit_answer()` - 多選題判分邏輯
+- `quiz_service.py::calculate_score()` - 成績計算與統計
+- `quiz.py::/quiz/<int:question_id>` - 動態題目顯示
 
-### 3. 管理後台流程
+### 3. API流程 (CSRF已修正)
 ```
-題目CRUD → 批量導入 → 統計查詢 → 資料維護
+API請求 → CSRF檢查(已排除) → 業務邏輯 → JSON響應
 ```
 
-## 資料庫結構
+**關鍵實作**：
+- `__init__.py::init_extensions()` - API藍圖CSRF排除
+- `api.py` - RESTful API端點
+- `quiz_service.py` - 統一的業務邏輯服務
+
+## 🗄️ 資料庫結構 (已更新)
 
 ### 主表：questions
 ```sql
+CREATE TABLE questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_hash TEXT UNIQUE NOT NULL,     -- SHA-256 hash用於去重
+    question_text TEXT NOT NULL,            -- 題目內容
+    question_type TEXT NOT NULL,            -- 題型：single_choice/multiple_choice
+    options TEXT NOT NULL,                  -- JSON格式選項陣列
+    correct_answer TEXT NOT NULL,           -- 單選：索引字串，多選：逗號分隔索引
+    correct_answers TEXT,                   -- JSON格式正確答案索引陣列
+    category TEXT DEFAULT '一般',           -- 題目分類
+    difficulty TEXT DEFAULT '中等',         -- 難度級別
+    explanation TEXT,                       -- 題目解析
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 會話表：quiz_sessions
+```sql
+CREATE TABLE quiz_sessions (
+    id TEXT PRIMARY KEY,                    -- UUID會話ID
+    quiz_config TEXT NOT NULL,             -- JSON格式測驗配置
+    questions TEXT NOT NULL,               -- JSON格式題目列表
+    user_answers TEXT,                     -- JSON格式用戶答案
+    score INTEGER,                         -- 總分
+    total_questions INTEGER NOT NULL,      -- 總題數
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP
+);
+```
+
+### 索引設計
+- `question_hash` 欄位：UNIQUE約束，確保題目唯一性，支援O(1)去重
+- `question_type` 欄位：B-tree索引，加速題型分類查詢
+- `category` 欄位：B-tree索引，支援分類過濾
+- `created_at` 欄位：時間排序索引，支援時間範圍查詢
+
+## 🔐 Hash去重機制 (已優化)
+
+### 演算法實作
+```python
+def calculate_question_hash(question_data):
+    # 標準化輸入數據，確保一致性
+    normalized_data = {
+        'question': question_data['question_text'].strip(),
+        'type': question_data['question_type'],
+        'options': sorted([opt.strip() for opt in question_data['options']]),
 CREATE TABLE questions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     hash TEXT UNIQUE NOT NULL,           -- SHA-256雜湊值，去重用
@@ -240,28 +309,99 @@ REINDEX;
 PRAGMA integrity_check;
 ```
 
-## 修復記錄
+## 🧪 測試架構 (v2.0新增)
 
-### 2025年6月22日 - API健康檢查修復
-**問題**：`/api/health` 路由出現 `'QuestionService' object has no attribute 'get_total_count'` 錯誤
+### 測試資料夾結構
+```
+test/
+├── README.md                   # 測試說明文檔
+├── run_all_tests.py           # 一鍵執行所有測試
+├── run_tests.bat              # Windows批處理檔案
+├── run_tests.sh               # Linux/Mac執行腳本
+├── ORGANIZE_REPORT.md         # 檔案整理報告
+├── system_check.py            # 系統全面檢查
+├── check_multiple_choice.py   # 多選題專項檢查
+├── check_db.py                # 資料庫檢查
+├── check_docker_env.py        # Docker環境檢查
+├── test_import.py             # 導入功能測試
+├── test_index.py              # 首頁功能測試
+├── test_quiz.py               # 測驗功能測試
+├── fix_api.py                 # API修復工具
+├── init_db_fixed.py           # 修正版資料庫初始化
+└── debug_stats.py             # 除錯統計工具
+```
+
+### 核心測試腳本
+#### 1. 系統全面檢查 (`system_check.py`)
+- **功能**：驗證資料庫、API、網頁、測驗功能
+- **技術**：自動化HTTP請求測試，SQLite查詢驗證
+- **輸出**：詳細的通過/失敗報告
+
+#### 2. 多選題專項檢查 (`check_multiple_choice.py`)
+- **功能**：驗證多選題載入、格式、答案索引
+- **技術**：直接SQL查詢，數據格式驗證
+- **關鍵指標**：多選題數量、答案格式正確性
+
+#### 3. 一鍵測試執行器 (`run_all_tests.py`)
+- **功能**：自動執行所有測試腳本並生成報告
+- **技術**：subprocess調用，結果彙總
+- **跨平台**：支援Windows (.bat) 和 Linux/Mac (.sh)
+
+### 測試驗證重點
+- ✅ 多選題完整流程：載入 → 顯示 → 判分
+- ✅ API端點功能：CSRF保護已優化
+- ✅ 資料庫完整性：題目數量、格式驗證
+- ✅ 前端功能：頁面載入、表單提交
+
+## 🔧 修復記錄與技術更新
+
+### 2025年6月22日 - 多選題完整修復
+**問題**：多選題載入、顯示和判分問題
 
 **修復方案**：
-在 `app/services/question_service.py` 中新增缺少的方法：
-- `get_total_count()` - 獲取題目總數
-- `get_current_time()` - 獲取當前時間
+1. **資料庫初始化優化** (`init_db_fixed.py`)
+   - 文字答案自動轉換為索引格式
+   - 支援多種JSON格式智能解析
+   - 多選題正確答案格式：`"1,2,3"` (逗號分隔索引)
 
-**影響範圍**：
-- ✅ 修復健康檢查API (`/api/health`)
-- ✅ 確保Docker容器健康狀態檢查正常
-- ✅ 維持所有其他API功能正常
+2. **API CSRF保護修復** (`app/__init__.py`)
+   - 排除API藍圖的CSRF保護：`csrf.exempt(api_bp)`
+   - 修正測驗創建API的400錯誤
+
+3. **業務邏輯優化** (`quiz_service.py`)
+   - 多選題判分算法優化
+   - 正確答案比較邏輯修正
+   - 支援動態答案格式轉換
 
 **驗證結果**：
-- Docker容器狀態：healthy
-- API回應：所有端點正常 (200狀態碼)
-- Web界面：正常運作
+- ✅ 資料庫：72題總計，16題多選題，56題單選題
+- ✅ API：所有端點正常回應 (201/200狀態碼)
+- ✅ 測驗創建：會話ID正常生成，題目正確返回
+- ✅ 多選題：載入、顯示、判分全流程正常
+
+### 2025年6月22日 - 檔案結構重組
+**目標**：統一測試檔案管理，提升維護效率
+
+**重組內容**：
+- 建立專用 `test/` 資料夾
+- 移動12個測試相關檔案
+- 修正相對路徑引用
+- 建立跨平台執行腳本
+
+**技術影響**：
+- 📁 結構更專業化，符合軟體開發最佳實踐
+- 🔧 便於CI/CD整合
+- 📖 完整的測試文檔和使用指南
+
+### 歷史修復記錄
+#### API健康檢查修復 (初期)
+- 新增 `get_total_count()` 和 `get_current_time()` 方法
+- 修復Docker容器健康狀態檢查
+- 確保API端點正常回應
 
 ---
 
-**技術版本**：Flask 3.0.0 + SQLite 3 + Python 3.7+  
-**架構模式**：MVC + 單體應用  
-**最後更新**：2025年6月22日
+**技術版本**：Flask 3.0.0 + SQLite 3 + Python 3.10+  
+**架構模式**：MVC分層架構 + 模組化設計  
+**測試覆蓋**：資料庫、API、前端、多選題專項測試  
+**最後更新**：2025年6月22日 - 多選題功能完整修復與測試架構建立

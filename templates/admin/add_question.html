@@ -18,9 +18,9 @@
                         </a>
                     </div>
                 </div>
-                <div class="card-body">
-                    <form action="{{ url_for('admin.add_question', edit=question_data.id if question_data else None) }}" 
+                <div class="card-body">                    <form action="{{ url_for('admin.add_question', edit=question_data.id if question_data else None) }}" 
                           method="post" id="questionForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         
                         <!-- 題型選擇 -->
                         <div class="mb-4">

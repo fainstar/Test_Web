@@ -13,7 +13,7 @@ services:
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-your-production-secret-key-change-this}
-      - DATABASE_PATH=/app/volumes/database/quiz_database.db
+      - DATABASE_PATH=/app/volumes/database/dev_quiz_database.db
     volumes:
       - ./volumes/database:/app/volumes/database
       - ./volumes/logs:/app/volumes/logs

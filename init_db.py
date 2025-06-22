@@ -141,8 +141,7 @@ def normalize_question_format(question_data):
             elif isinstance(ca, int):
                 correct_answer = str(ca)
                 correct_answers = [ca]
-            elif isinstance(ca, list):
-                # 處理多選答案
+            elif isinstance(ca, list):                # 處理多選答案
                 correct_answers = []
                 for ans in ca:
                     if isinstance(ans, str):
@@ -157,12 +156,30 @@ def normalize_question_format(question_data):
                 
                 if question_type == 'single_choice' and correct_answers:
                     correct_answer = str(correct_answers[0])
-                    
+                elif question_type == 'multiple_choice':
+                    # 對於多選題，將答案索引列表轉為逗號分隔的字符串
+                    correct_answer = ','.join(map(str, sorted(correct_answers)))
+        
         elif 'correct_answers' in question_data:
-            correct_answers = question_data['correct_answers']
-            if isinstance(correct_answers, list) and correct_answers:
-                if question_type == 'single_choice':
+            ca_list = question_data['correct_answers']
+            if isinstance(ca_list, list) and ca_list:
+                correct_answers = []
+                for ans in ca_list:
+                    if isinstance(ans, str):
+                        try:
+                            ans_index = options.index(ans)
+                            correct_answers.append(ans_index)
+                        except ValueError:
+                            print(f"⚠️  找不到答案 '{ans}' 在選項中")
+                            return None
+                    elif isinstance(ans, int):
+                        correct_answers.append(ans)
+                
+                if question_type == 'single_choice' and correct_answers:
                     correct_answer = str(correct_answers[0])
+                elif question_type == 'multiple_choice':
+                    # 對於多選題，將答案索引列表轉為逗號分隔的字符串
+                    correct_answer = ','.join(map(str, sorted(correct_answers)))
         
         # 如果沒有找到正確答案，跳過這個題目
         if not correct_answers:

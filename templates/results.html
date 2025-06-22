@@ -12,185 +12,204 @@
                 <a href="{{ url_for('main.index') }}" class="btn btn-primary">返回首頁</a>
             </div>
         </div>
-        {% else %}
-        <!-- 成績總覽 -->
-        <div class="card shadow-lg mb-4">
-            <div class="card-header bg-success text-white text-center">
-                <h2 class="mb-0"><i class="fas fa-trophy me-2"></i>測驗結果</h2>
+        {% else %}        <!-- 成績總覽 -->
+        <div class="card shadow-lg mb-4" style="background-color: #ffffff !important;">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="mb-0 fw-bold" style="color: #ffffff !important;">
+                    <i class="fas fa-trophy me-2"></i>測驗結果
+                </h2>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4" style="background-color: #ffffff !important;">
                 <div class="row text-center mb-4">
                     <div class="col-md-3">
-                        <div class="bg-light p-3 rounded">
+                        <div class="p-3 rounded border" style="background-color: #f8f9fa !important; border: 2px solid #dee2e6 !important;">
                             <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
-                            <h5>得分</h5>
-                            <span class="fs-2 fw-bold text-primary">{{ results.score_percentage }}%</span>
+                            <h5 style="color: #212529 !important; font-weight: bold;">得分</h5>
+                            <span class="fs-2 fw-bold" style="color: #0d6efd !important;">{{ results.score_percentage }}%</span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-light p-3 rounded">
-                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
-                            <h5>等級</h5>
-                            <span class="fs-4 fw-bold 
-                                {% if results.score_percentage >= 90 %}text-success
-                                {% elif results.score_percentage >= 80 %}text-info
-                                {% elif results.score_percentage >= 70 %}text-warning
-                                {% else %}text-danger{% endif %}">
-                                {{ results.grade }}
-                            </span>
+                        <div class="p-3 rounded border" style="background-color: #f8f9fa !important; border: 2px solid #dee2e6 !important;">
+                            <i class="fas fa-star fa-2x text-warning mb-2"></i>                            <h5 style="color: #212529 !important; font-weight: bold;">等級</h5>
+                            {% if results.score_percentage >= 90 %}
+                                <span class="fs-4 fw-bold" style="color: #198754 !important; font-weight: bold;">{{ results.grade }}</span>
+                            {% elif results.score_percentage >= 80 %}
+                                <span class="fs-4 fw-bold" style="color: #0dcaf0 !important; font-weight: bold;">{{ results.grade }}</span>
+                            {% elif results.score_percentage >= 70 %}
+                                <span class="fs-4 fw-bold" style="color: #ffc107 !important; font-weight: bold;">{{ results.grade }}</span>
+                            {% else %}
+                                <span class="fs-4 fw-bold" style="color: #dc3545 !important; font-weight: bold;">{{ results.grade }}</span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-light p-3 rounded">
+                        <div class="p-3 rounded border" style="background-color: #f8f9fa !important; border: 2px solid #dee2e6 !important;">
                             <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                            <h5>正確題數</h5>
-                            <span class="fs-4 fw-bold">{{ results.correct_count }} / {{ results.total_questions }}</span>
+                            <h5 style="color: #212529 !important; font-weight: bold;">正確題數</h5>
+                            <span class="fs-4 fw-bold" style="color: #212529 !important;">{{ results.correct_count }} / {{ results.total_questions }}</span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-light p-3 rounded">
+                        <div class="p-3 rounded border" style="background-color: #f8f9fa !important; border: 2px solid #dee2e6 !important;">
                             <i class="fas fa-clock fa-2x text-info mb-2"></i>
-                            <h5>用時</h5>
-                            <span class="fs-4 fw-bold">{{ results.duration_minutes }} 分鐘</span>
+                            <h5 style="color: #212529 !important; font-weight: bold;">用時</h5>
+                            <span class="fs-4 fw-bold" style="color: #212529 !important;">{{ results.duration_minutes }} 分鐘</span>
                         </div>
                     </div>
-                </div>
-
-                <!-- 進度條 -->
+                </div>                <!-- 進度條 -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">答對率</label>
+                    <label class="form-label fw-bold" style="color: #212529 !important;">答對率</label>
                     <div class="progress" style="height: 20px;">
-                        <div class="progress-bar 
-                            {% if results.score_percentage >= 90 %}bg-success
-                            {% elif results.score_percentage >= 80 %}bg-info
-                            {% elif results.score_percentage >= 70 %}bg-warning
-                            {% else %}bg-danger{% endif %}" 
-                            style="width: {{ results.score_percentage }}%">
+                        {% if results.score_percentage >= 90 %}
+                            <div class="progress-bar bg-success" style="width: {{ results.score_percentage }}%; color: #ffffff !important; font-weight: bold;">
+                        {% elif results.score_percentage >= 80 %}
+                            <div class="progress-bar bg-info" style="width: {{ results.score_percentage }}%; color: #ffffff !important; font-weight: bold;">
+                        {% elif results.score_percentage >= 70 %}
+                            <div class="progress-bar bg-warning" style="width: {{ results.score_percentage }}%; color: #000000 !important; font-weight: bold;">
+                        {% else %}
+                            <div class="progress-bar bg-danger" style="width: {{ results.score_percentage }}%; color: #ffffff !important; font-weight: bold;">
+                        {% endif %}
                             {{ results.score_percentage }}%
                         </div>
                     </div>
-                </div>
-
-                <div class="text-center">
-                    <button class="btn btn-primary me-2" onclick="toggleDetails()">
+                </div><div class="text-center">
+                    <button class="btn btn-primary me-2" onclick="toggleDetails()" id="toggleBtn">
+                        {% if results.correct_count < results.total_questions %}
+                        <i class="fas fa-eye-slash me-1"></i>隱藏詳細解答
+                        {% else %}
                         <i class="fas fa-list-alt me-1"></i>查看詳細解答
+                        {% endif %}
                     </button>
-                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
                         <i class="fas fa-home me-1"></i>返回首頁
                     </a>
-                    <a href="{{ url_for('start_quiz') }}" class="btn btn-outline-success">
+                    <a href="{{ url_for('quiz.start_quiz') }}" class="btn btn-outline-success">
                         <i class="fas fa-redo me-1"></i>重新測驗
                     </a>
                 </div>
-            </div>
-        </div>
-
-        <!-- 詳細結果 -->
-        <div id="detailsSection" style="display: none;">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>詳細解答</h4>
+                
+                {% if results.correct_count < results.total_questions %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>提示：</strong>您有 {{ results.total_questions - results.correct_count }} 題答錯了，
+                    點擊上方的「查看詳細解答」按鈕可以查看正確答案和詳細說明。
                 </div>
-                <div class="card-body">
+                {% endif %}
+            </div>
+        </div>        <!-- 詳細結果 -->
+        <div id="detailsSection"{% if results.correct_count < results.total_questions %} style="display: block;"{% else %} style="display: none;"{% endif %}>
+            <div class="card" style="background-color: #ffffff !important;">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0" style="color: #ffffff !important;">
+                        <i class="fas fa-list-alt me-2"></i>詳細解答
+                    </h4>
+                </div>
+                <div class="card-body" style="background-color: #ffffff !important;">
                     {% for result in results.detailed_results %}
-                    <div class="question-result mb-4 p-3 border rounded 
-                        {% if result.is_correct %}border-success bg-light{% else %}border-danger{% endif %}">
+                    <div class="question-result mb-4 p-3 border rounded" style="
+                        background-color: #ffffff !important;
+                        {% if result.is_correct %}border: 2px solid #198754 !important; background-color: #f8fff9 !important;
+                        {% else %}border: 2px solid #dc3545 !important; background-color: #fff5f5 !important;{% endif %}">
                         
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h6 class="mb-0">
+                            <h6 class="mb-0" style="color: #212529 !important; font-weight: bold;">
                                 題目 {{ loop.index }}
                                 {% if result.type == 'multiple_choice' %}
-                                    <span class="badge bg-warning ms-2">多選題</span>
+                                    <span class="badge bg-warning text-dark ms-2">多選題</span>
                                 {% else %}
-                                    <span class="badge bg-info ms-2">單選題</span>
+                                    <span class="badge bg-info text-white ms-2">單選題</span>
                                 {% endif %}
                             </h6>
                             {% if result.is_correct %}
-                                <span class="badge bg-success fs-6">
+                                <span class="badge bg-success fs-6" style="color: #ffffff !important;">
                                     <i class="fas fa-check me-1"></i>正確
                                 </span>
                             {% else %}
-                                <span class="badge bg-danger fs-6">
+                                <span class="badge bg-danger fs-6" style="color: #ffffff !important;">
                                     <i class="fas fa-times me-1"></i>錯誤
                                 </span>
                             {% endif %}
                         </div>
 
                         <div class="question-text mb-3">
-                            <strong>{{ result.question }}</strong>
+                            <strong style="color: #212529 !important; font-size: 1.1em;">{{ result.question }}</strong>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-primary">所有選項：</h6>
+                        <div class="row">                            <div class="col-md-6">
+                                <h6 style="color: #0d6efd !important; font-weight: bold;">所有選項：</h6>
                                 <ul class="list-unstyled">
                                     {% for option in result.options %}
-                                    <li class="mb-1">
-                                        {% if result.type == 'single_choice' %}
+                                    <li class="mb-1">                                        {% if result.type == 'single' %}
                                             {% if option == result.correct_answer %}
                                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                                <strong class="text-success">{{ option }}</strong> (正確答案)
+                                                <strong style="color: #198754 !important; font-weight: bold;">{{ option }}</strong> 
+                                                <span style="color: #198754 !important;">(正確答案)</span>
                                             {% elif option == result.user_answer %}
                                                 <i class="fas fa-times-circle text-danger me-2"></i>
-                                                <span class="text-danger">{{ option }}</span> (您的選擇)
+                                                <span style="color: #dc3545 !important; font-weight: bold;">{{ option }}</span> 
+                                                <span style="color: #dc3545 !important;">(您的選擇)</span>
                                             {% else %}
                                                 <i class="far fa-circle text-muted me-2"></i>
-                                                {{ option }}
+                                                <span style="color: #212529 !important;">{{ option }}</span>
                                             {% endif %}
                                         {% else %}
                                             {% if option in result.correct_answers %}
                                                 <i class="fas fa-check-square text-success me-2"></i>
-                                                <strong class="text-success">{{ option }}</strong> (正確答案)
+                                                <strong style="color: #198754 !important; font-weight: bold;">{{ option }}</strong> 
+                                                <span style="color: #198754 !important;">(正確答案)</span>
                                             {% elif option in result.user_answer %}
                                                 {% if option in result.correct_answers %}
                                                     <i class="fas fa-check-square text-success me-2"></i>
-                                                    <strong class="text-success">{{ option }}</strong> (您的正確選擇)
+                                                    <strong style="color: #198754 !important; font-weight: bold;">{{ option }}</strong> 
+                                                    <span style="color: #198754 !important;">(您的正確選擇)</span>
                                                 {% else %}
                                                     <i class="fas fa-times-circle text-danger me-2"></i>
-                                                    <span class="text-danger">{{ option }}</span> (您的錯誤選擇)
+                                                    <span style="color: #dc3545 !important; font-weight: bold;">{{ option }}</span> 
+                                                    <span style="color: #dc3545 !important;">(您的錯誤選擇)</span>
                                                 {% endif %}
                                             {% else %}
                                                 <i class="far fa-square text-muted me-2"></i>
-                                                {{ option }}
+                                                <span style="color: #212529 !important;">{{ option }}</span>
                                             {% endif %}
                                         {% endif %}
                                     </li>
                                     {% endfor %}
                                 </ul>
-                            </div>
-                            <div class="col-md-6">
+                            </div>                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h6 class="text-info">您的答案：</h6>
-                                    {% if result.type == 'single_choice' %}
+                                    <h6 style="color: #0d6efd !important; font-weight: bold;">您的答案：</h6>                                    {% if result.type == 'single_choice' %}
                                         {% if result.user_answer %}
-                                            <span class="{% if result.is_correct %}text-success{% else %}text-danger{% endif %}">
-                                                {{ result.user_answer }}
-                                            </span>
+                                            {% if result.is_correct %}
+                                                <span style="color: #198754 !important; font-weight: bold;">{{ result.user_answer }}</span>
+                                            {% else %}
+                                                <span style="color: #dc3545 !important; font-weight: bold;">{{ result.user_answer }}</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span class="text-muted">未作答</span>
+                                            <span style="color: #6c757d !important;">未作答</span>
                                         {% endif %}
                                     {% else %}
                                         {% if result.user_answer %}
                                             {% for answer in result.user_answer %}
                                                 <span class="badge 
-                                                    {% if answer in result.correct_answers %}bg-success{% else %}bg-danger{% endif %} me-1">
+                                                    {% if answer in result.correct_answers %}bg-success{% else %}bg-danger{% endif %} me-1" 
+                                                    style="color: #ffffff !important;">
                                                     {{ answer }}
                                                 </span>
                                             {% endfor %}
                                         {% else %}
-                                            <span class="text-muted">未作答</span>
+                                            <span style="color: #6c757d !important;">未作答</span>
                                         {% endif %}
                                     {% endif %}
                                 </div>
-                                
-                                <div>
-                                    <h6 class="text-success">正確答案：</h6>
-                                    {% if result.type == 'single_choice' %}
-                                        <strong class="text-success">{{ result.correct_answer }}</strong>
+                                  <div>
+                                    <h6 style="color: #198754 !important; font-weight: bold;">正確答案：</h6>                                    {% if result.type == 'single' %}
+                                        <strong style="color: #198754 !important; font-size: 1.2em; font-weight: bold; background-color: #f8fff9; padding: 0.25rem 0.5rem; border-radius: 0.25rem; word-wrap: break-word; white-space: normal;">{{ result.correct_answer }}</strong>
                                     {% else %}
-                                        {% for answer in result.correct_answers %}
-                                            <span class="badge bg-success me-1">{{ answer }}</span>
-                                        {% endfor %}
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                                            {% for answer in result.correct_answers %}
+                                                <span class="badge bg-success" style="color: #ffffff !important; font-size: 0.9em; padding: 0.5rem 0.75rem; word-wrap: break-word; white-space: normal;">{{ answer }}</span>
+                                            {% endfor %}
+                                        </div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -199,26 +218,109 @@
                     {% endfor %}
                 </div>
             </div>
-        </div>
-        {% endif %}
+        </div>        {% endif %}
     </div>
 </div>
+
+<style>
+/* 改善結果頁面的文字可讀性 */
+.question-result {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+}
+
+.question-result .question-text {
+    color: #1a1a1a !important;
+}
+
+.question-result .text-dark {
+    color: #212529 !important;
+}
+
+.question-result h6 {
+    font-weight: bold;
+}
+
+.question-result li {
+    padding: 0.25rem 0;
+}
+
+/* 確保選項文字清晰可見 */
+.question-result .list-unstyled li span {
+    font-weight: 500;
+}
+
+/* 改善卡片對比度 */
+.card {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6;
+}
+
+.card-body {
+    color: #333333 !important;
+}
+
+/* 確保所有文字都有足夠對比度 */
+.bg-light {
+    background-color: #f8f9fa !important;
+    color: #333333 !important;
+}
+
+.bg-light h5 {
+    color: #333333 !important;
+}
+
+.bg-light span {
+    color: #333333 !important;
+}
+
+/* 強制設定深色文字 */
+.text-dark {
+    color: #212529 !important;
+}
+
+/* 確保進度條標籤可見 */
+.form-label {
+    color: #333333 !important;
+}
+
+/* 確保所有標題可見 */
+h5, h6 {
+    color: inherit !important;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
 function toggleDetails() {
     const detailsSection = document.getElementById('detailsSection');
-    const btn = event.target;
+    const btn = document.getElementById('toggleBtn');
     
-    if (detailsSection.style.display === 'none') {
+    if (detailsSection.style.display === 'none' || !detailsSection.style.display) {
         detailsSection.style.display = 'block';
         btn.innerHTML = '<i class="fas fa-eye-slash me-1"></i>隱藏詳細解答';
-        btn.scrollIntoView({ behavior: 'smooth' });
+        // 平滑滾動到詳細結果區域
+        setTimeout(() => {
+            detailsSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     } else {
         detailsSection.style.display = 'none';
         btn.innerHTML = '<i class="fas fa-list-alt me-1"></i>查看詳細解答';
+        // 滾動回按鈕位置
+        btn.scrollIntoView({ behavior: 'smooth' });
     }
 }
+
+// 頁面加載時，如果詳細結果已經顯示，確保滾動到詳細結果區域
+document.addEventListener('DOMContentLoaded', function() {
+    const detailsSection = document.getElementById('detailsSection');
+    if (detailsSection && detailsSection.style.display === 'block') {
+        // 延遲一點時間後滾動，確保頁面完全渲染
+        setTimeout(() => {
+            detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+    }
+});
 </script>
 {% endblock %}

@@ -67,9 +67,8 @@
                                     <option value="completed">已完成</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <select class="form-control" id="sortBy">
-                                    <option value="created_at">按創建時間</option>
+                            <div class="col-md-4">                                <select class="form-control" id="sortBy">
+                                    <option value="started_at">按創建時間</option>
                                     <option value="score">按分數</option>
                                     <option value="total_questions">按題目數</option>
                                 </select>
@@ -140,7 +139,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <small>{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            <small>{{ session.started_at.strftime('%Y-%m-%d %H:%M') }}</small>
                                         </td>
                                         <td>
                                             {% if session.completed_at %}
@@ -245,8 +244,7 @@ function sortSessions() {
             case 'total_questions':
                 aValue = parseInt(a.cells[2].textContent);
                 bValue = parseInt(b.cells[2].textContent);
-                return bValue - aValue; // 降序
-            default: // created_at
+                return bValue - aValue; // 降序            default: // started_at
                 aValue = a.cells[5].textContent;
                 bValue = b.cells[5].textContent;
                 return bValue.localeCompare(aValue); // 降序
@@ -273,7 +271,7 @@ async function viewSession(sessionId) {
                         <tr><td>狀態:</td><td><span class="badge ${session.status === 'completed' ? 'bg-success' : 'bg-warning'}">${session.status === 'completed' ? '已完成' : '進行中'}</span></td></tr>
                         <tr><td>題目總數:</td><td>${session.total_questions}</td></tr>
                         <tr><td>當前題目:</td><td>${session.current_question}</td></tr>
-                        <tr><td>創建時間:</td><td>${session.created_at}</td></tr>
+                        <tr><td>創建時間:</td><td>${session.started_at}</td></tr>
                         ${session.completed_at ? `<tr><td>完成時間:</td><td>${session.completed_at}</td></tr>` : ''}
                     </table>
                 </div>

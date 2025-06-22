@@ -145,8 +145,8 @@ def show_examples(quiz_data):
 
 # 主程式
 if __name__ == "__main__":
-    input_file = "test02.json"  # 原始檔案
-    output_file = "quiz_complete02.json"  # 輸出檔案
+    input_file = "test04.json"  # 原始檔案
+    output_file = "quiz_complete04.json"  # 輸出檔案
     
     try:
         result = parse_quiz_data_with_multiple_choice(input_file, output_file)

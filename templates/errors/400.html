@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}請求錯誤 - 線上測驗系統{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="display-1 text-danger">400</h1>
+                    <h2 class="mb-4">請求錯誤</h2>
+                    <p class="lead mb-4">
+                        您的請求有問題，可能是表單數據不正確或安全驗證失敗。
+                    </p>
+                    <div class="mb-4">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-1"></i>返回首頁
+                        </a>
+                        <a href="{{ url_for('quiz.start_quiz') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-play me-1"></i>開始測驗
+                        </a>
+                    </div>
+                    <small class="text-muted">
+                        如果問題持續發生，請刷新頁面重新嘗試。
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

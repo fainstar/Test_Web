@@ -16,6 +16,16 @@ def register_context_processors(app):
             'app_version': '2.0.0'
         }
     
+    @app.context_processor
+    def inject_csrf_token():
+        """注入CSRF token到模板"""
+        try:
+            from flask_wtf.csrf import generate_csrf
+            return dict(csrf_token=generate_csrf)
+        except Exception as e:
+            # 如果CSRF token生成失敗，返回空函數
+            return dict(csrf_token=lambda: '')
+    
     @app.template_filter('datetime_format')
     def datetime_format(value, format='%Y-%m-%d %H:%M:%S'):
         """日期時間格式化過濾器"""

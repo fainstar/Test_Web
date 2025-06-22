@@ -24,13 +24,12 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {% if questions %}
-                        <!-- 統計信息 -->
+                    {% if questions %}                        <!-- 統計信息 -->
                         <div class="row mb-4">
                             <div class="col-md-3">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body text-center">
-                                        <h5>{{ questions|length }}</h5>
+                                        <h5>{{ pagination.total if pagination and pagination.total else questions|length }}</h5>
                                         <p class="mb-0">總題目數</p>
                                     </div>
                                 </div>
@@ -39,7 +38,7 @@
                                 <div class="card bg-success text-white">
                                     <div class="card-body text-center">
                                         <h5>{{ questions|selectattr("type", "equalto", "single")|list|length }}</h5>
-                                        <p class="mb-0">單選題</p>
+                                        <p class="mb-0">當前頁單選題</p>
                                     </div>
                                 </div>
                             </div>
@@ -47,7 +46,7 @@
                                 <div class="card bg-info text-white">
                                     <div class="card-body text-center">
                                         <h5>{{ questions|selectattr("type", "equalto", "multiple")|list|length }}</h5>
-                                        <p class="mb-0">多選題</p>
+                                        <p class="mb-0">當前頁多選題</p>
                                     </div>
                                 </div>
                             </div>
@@ -59,11 +58,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 搜索和過濾 -->
+                        </div>                        <!-- 搜索和過濾 -->
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-search"></i>
@@ -72,19 +69,32 @@
                                            placeholder="搜索題目內容...">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select class="form-control" id="typeFilter">
                                     <option value="">所有題型</option>
                                     <option value="single">單選題</option>
                                     <option value="multiple">多選題</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select class="form-control" id="explanationFilter">
                                     <option value="">所有題目</option>
                                     <option value="with">有解析</option>
                                     <option value="without">無解析</option>
                                 </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" id="perPageFilter" onchange="changePerPage()">
+                                    <option value="all" {{ 'selected' if request.args.get('per_page', 'all') == 'all' else '' }}>顯示全部</option>
+                                    <option value="20" {{ 'selected' if request.args.get('per_page') == '20' else '' }}>每頁20題</option>
+                                    <option value="50" {{ 'selected' if request.args.get('per_page') == '50' else '' }}>每頁50題</option>
+                                    <option value="100" {{ 'selected' if request.args.get('per_page') == '100' else '' }}>每頁100題</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100" onclick="clearFilters()">
+                                    <i class="fas fa-times me-1"></i>清除篩選
+                                </button>
                             </div>
                         </div>
 
@@ -120,13 +130,13 @@
                                                 {% if question.question|length > 100 %}...{% endif %}
                                             </div>
                                         </td>
-                                        <td>
-                                            <small>
+                                        <td>                                            <small>
                                                 {% for option in question.options %}
-                                                    <div class="{% if loop.index0 in question.correct_answer %}text-success fw-bold{% endif %}">
+                                                    {% set is_correct = (question.correct_answer is iterable and question.correct_answer is not string and loop.index0 in question.correct_answer) or (question.correct_answer is not iterable and loop.index0 == question.correct_answer) %}
+                                                    <div class="{% if is_correct %}text-success fw-bold{% endif %}">
                                                         {{ loop.index }}. {{ option[:30] }}
                                                         {% if option|length > 30 %}...{% endif %}
-                                                        {% if loop.index0 in question.correct_answer %}
+                                                        {% if is_correct %}
                                                             <i class="fas fa-check text-success"></i>
                                                         {% endif %}
                                                     </div>
@@ -204,6 +214,28 @@ document.getElementById('searchInput').addEventListener('input', filterQuestions
 document.getElementById('typeFilter').addEventListener('change', filterQuestions);
 document.getElementById('explanationFilter').addEventListener('change', filterQuestions);
 
+// 更改每頁顯示數量
+function changePerPage() {
+    const perPage = document.getElementById('perPageFilter').value;
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.delete('page'); // 重置到第一頁
+    window.location.href = url.toString();
+}
+
+// 清除所有篩選
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('explanationFilter').value = '';
+    document.getElementById('perPageFilter').value = 'all';
+    
+    // 重新載入頁面，移除所有URL參數
+    const url = new URL(window.location);
+    url.search = '';
+    window.location.href = url.toString();
+}
+
 function filterQuestions() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const typeFilter = document.getElementById('typeFilter').value;
@@ -279,13 +311,14 @@ function deleteQuestion(questionId) {
         form.method = 'POST';
         form.action = `/admin/questions/${questionId}/delete`;
         
-        const csrfToken = document.querySelector('meta[name=csrf-token]');
+        // 添加 CSRF token
+        const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
         if (csrfToken) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'csrf_token';
-            input.value = csrfToken.getAttribute('content');
-            form.appendChild(input);
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
         }
         
         document.body.appendChild(form);

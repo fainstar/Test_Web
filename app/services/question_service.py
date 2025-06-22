@@ -50,6 +50,32 @@ class QuestionService:
         """獲取單個題目"""
         return self.question_model.get_by_id(question_id)
     
+    def update_question(self, question_id: int, question_data: Dict[str, Any]) -> Dict[str, Any]:
+        """更新題目"""
+        try:
+            # 檢查題目是否存在
+            existing_question = self.question_model.get_by_id(question_id)
+            if not existing_question:
+                return {'success': False, 'message': '題目不存在'}
+            
+            # 數據驗證
+            if not self._validate_question_data(question_data):
+                return {'success': False, 'message': '題目數據格式不正確'}
+            
+            # 標準化數據
+            normalized_data = self._normalize_question_data(question_data)
+            
+            # 更新數據庫
+            success = self.question_model.update(question_id, normalized_data)
+            
+            if success:
+                return {'success': True, 'message': '題目更新成功'}
+            else:
+                return {'success': False, 'message': '更新失敗'}
+                
+        except Exception as e:
+            return {'success': False, 'message': f'更新題目時發生錯誤: {str(e)}'}
+    
     def get_questions(self, page: int = 1, per_page: int = 20, 
                      filters: Dict[str, Any] = None) -> Dict[str, Any]:
         """獲取題目列表"""

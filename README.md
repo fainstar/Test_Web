@@ -5,23 +5,25 @@
 ## 🆕 版本 2.0 特色
 
 - 🏗️ **模組化架構**：採用MVC分層設計，易於維護和擴展
-- 🔌 **RESTful API**：完整的API接口支援
+- 🔌 **RESTful API**：完整的API接口支援，已修正CSRF保護問題
 - 🎯 **智能隨機**：進階隨機出題算法，支援多種配置
 - 📊 **詳細統計**：全面的數據分析和報表
 - 🔒 **數據驗證**：完善的輸入驗證和錯誤處理
 - 🚀 **高效能**：優化的數據庫查詢和索引設計
 - 🧹 **乾淨架構**：經過專業整理的檔案結構，完全重構並清理
 - ✨ **生產就緒**：模組化設計，適合部署和長期維護
+- 🧪 **完整測試**：統一的測試架構，包含系統檢查和功能驗證
+- ✅ **多選題支援**：完整的多選題載入、顯示和判分功能
 
 ## 功能特色
 
-- ✅ **多種題型支援**：單選題、多選題
+- ✅ **多種題型支援**：單選題、多選題（已完整實現並測試）
 - ✅ **智能去重**：使用SHA-256演算法自動去除重複題目
 - ✅ **進階隨機抽題**：支援題型比例、難度分配、選項亂序等
 - ✅ **測驗會話管理**：完整的測驗生命週期管理
 - ✅ **成績統計**：詳細的答題結果與分析
 - ✅ **管理後台**：題目管理、批量導入、數據統計
-- ✅ **RESTful API**：支援第三方整合
+- ✅ **RESTful API**：支援第三方整合，API端點正常運作
 - ✅ **美觀界面**：現代化響應式設計，優化顏色對比度
 - ✅ **數據持久化**：SQLite資料庫儲存
 - ✅ **一鍵部署**：完整的初始化腳本和配置管理
@@ -29,6 +31,8 @@
 - ✅ **多格式導入**：支援3種JSON格式，智能轉換文字答案
 - ✅ **容錯處理**：格式錯誤自動跳過，詳細錯誤報告
 - ✅ **界面優化**：修正顏色對比度，支援深色模式，無障礙設計
+- ✅ **完整測試架構**：專用test資料夾，包含系統檢查和功能測試
+- ✅ **多選題完全支援**：載入、顯示、判分全流程正常運作
 
 ## 專案重構成果
 
@@ -122,7 +126,7 @@ cp .env.example .env
 # 編輯 .env 文件設定必要參數
 # FLASK_ENV=development
 # SECRET_KEY=your-secret-key
-# DATABASE_PATH=quiz_database.db
+# DATABASE_PATH=dev_quiz_database.db
 ```
 
 #### 5. 初始化資料庫
@@ -495,6 +499,20 @@ Test_Web/
 ├── base/                      # 初始題庫檔案
 │   ├── quiz_complete.json
 │   └── quiz_complete02.json
+├── test/                      # 測試相關檔案 🧪
+│   ├── README.md              # 測試說明文檔
+│   ├── system_check.py        # 系統全面檢查
+│   ├── check_multiple_choice.py # 多選題檢查
+│   ├── check_db.py            # 資料庫檢查
+│   ├── check_docker_env.py    # Docker環境檢查
+│   ├── test_import.py         # 導入功能測試
+│   ├── test_index.py          # 首頁功能測試
+│   ├── test_quiz.py           # 測驗功能測試
+│   ├── fix_api.py             # API修復工具
+│   ├── init_db_fixed.py       # 修正版資料庫初始化
+│   ├── debug_stats.py         # 除錯統計工具
+│   ├── test.json              # 測試資料檔案
+│   └── test02.json            # 測試資料檔案
 ├── nginx/                     # Nginx配置（Docker用）
 │   ├── nginx.conf             # Nginx主配置
 │   └── ssl/                   # SSL證書目錄
@@ -503,7 +521,7 @@ Test_Web/
 │   ├── logs/                  # 日誌文件
 │   ├── uploads/               # 上傳文件
 │   └── README.md              # Volumes使用說明
-└── quiz_database.db          # SQLite資料庫檔案
+└── dev_quiz_database.db      # SQLite資料庫檔案
 ```
 
 ## 常見問題
@@ -520,34 +538,56 @@ A: 不會。系統使用hash演算法自動檢測並跳過重複題目。
 A: 可以。在首頁選擇5-20題之間的任意數量。
 
 ### Q: 如何備份題目資料？
-A: 直接複製 `quiz_database.db` 檔案即可備份所有題目。
+A: 直接複製 `dev_quiz_database.db` 檔案即可備份所有題目。
 
 ### Q: 如何重置系統？
-A: 刪除 `quiz_database.db` 檔案，重新啟動系統即可重置。
+A: 刪除 `dev_quiz_database.db` 檔案，重新啟動系統即可重置。
+
+### Q: 如何執行系統測試？
+A: 使用 `test/` 資料夾中的測試腳本：
+- 執行 `python test/system_check.py` 進行全面檢查
+- 執行 `python test/check_multiple_choice.py` 檢查多選題
+- 更多測試選項請參考 `test/README.md`
+
+### Q: 系統出現問題時該如何排除？
+A: 按以下順序排除：
+1. 執行 `python test/system_check.py` 檢查整體狀態
+2. 檢查 `test/` 資料夾中的相關測試腳本
+3. 查看錯誤日誌和輸出信息
+4. 參考 `test/README.md` 中的故障排除指南
 
 ## 技術細節
 
 ### 技術特點
 - **設計模式**：MVC分層架構
 - **數據庫**：SQLite（可輕鬆升級到PostgreSQL/MySQL）
-- **ORM**：SQLAlchemy
+- **ORM**：自訂輕量化ORM，支援SQLite優化
 - **前端**：Jinja2模板 + 現代CSS + Bootstrap 5
-- **API**：RESTful設計，JSON格式
+- **API**：RESTful設計，JSON格式，CSRF保護已優化
 - **界面**：響應式設計，深色模式支援，無障礙優化
+- **測試架構**：專用測試資料夾，自動化檢查腳本
 
 ### 性能特點
 - **題目去重**：SHA-256哈希算法，O(1)查重複
 - **隨機算法**：Fisher-Yates洗牌，均勻分佈
 - **數據庫優化**：索引優化，批量操作
 - **內存管理**：連接池，資源自動回收
+- **多選題優化**：專門的索引處理，高效判分算法
 
 ### 安全性
 - **輸入驗證**：嚴格的數據格式檢查
 - **SQL防護**：ORM防止SQL注入
+- **CSRF保護**：選擇性CSRF保護，API端點已優化
 - **錯誤處理**：友好的錯誤頁面，不洩露內部信息
 - **文件安全**：限制檔案類型和大小
 - **界面安全**：防XSS攻擊，CSP安全策略
 - **無障礙性**：符合WCAG 2.1 AA標準，支援螢幕閱讀器
+
+### 測試和維護
+- **自動化測試**：完整的系統檢查腳本
+- **多選題驗證**：專門的多選題檢查工具
+- **一鍵測試**：跨平台測試執行腳本
+- **詳細報告**：完整的測試報告和錯誤診斷
 
 ## 故障排除
 
@@ -599,7 +639,7 @@ pip install -r requirements.txt
 **Q: 資料庫初始化失敗**
 ```bash
 # 刪除現有資料庫檔案重新初始化
-del quiz_database.db
+del dev_quiz_database.db
 python init_db.py
 ```
 

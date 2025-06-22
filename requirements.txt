@@ -11,6 +11,6 @@ python-dotenv==1.0.0  # 環境變數管理
 
 # 可選擴展（如需要可以取消註釋）
 # Flask-Login==0.6.3      # 用戶認證
-# Flask-WTF==1.2.1        # 表單處理
+Flask-WTF==1.2.1        # 表單處理和CSRF保護
 # Flask-CORS==4.0.0       # CORS支援
 # Flask-Caching==2.1.0    # 快取支援

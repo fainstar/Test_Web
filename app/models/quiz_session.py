@@ -46,8 +46,7 @@ class QuizSession(BaseModel):
         '''
         self.execute_query(answer_query)
         
-        # 創建索引
-        self.execute_query('CREATE INDEX IF NOT EXISTS idx_session_id ON quiz_sessions (session_id)')
+        # 創建索引        self.execute_query('CREATE INDEX IF NOT EXISTS idx_session_id ON quiz_sessions (session_id)')
         self.execute_query('CREATE INDEX IF NOT EXISTS idx_user_answers_session ON user_answers (session_id)')
     
     def create_session(self, session_id: str, questions: List[Dict[str, Any]], 
@@ -56,8 +55,8 @@ class QuizSession(BaseModel):
         query = '''
             INSERT INTO quiz_sessions (
                 session_id, total_questions, correct_answers, 
-                score_percentage, duration_minutes, quiz_config, started_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                score_percentage, duration_minutes, quiz_config, started_at, questions_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         '''
         
         params = (
@@ -67,7 +66,8 @@ class QuizSession(BaseModel):
             0.0,  # 初始分數
             0.0,  # 初始持續時間
             json.dumps(quiz_config or {}, ensure_ascii=False),
-            datetime.now().isoformat()
+            datetime.now().isoformat(),
+            json.dumps(questions, ensure_ascii=False)  # 保存題目列表
         )
         
         return self.execute_insert(query, params)

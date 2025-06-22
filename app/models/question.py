@@ -102,6 +102,53 @@ class Question(BaseModel):
         
         return self._format_question(rows[0])
     
+    def update(self, question_id: int, question_data: Dict[str, Any]) -> bool:
+        """更新題目"""
+        try:
+            # 生成新的hash值
+            question_hash = self.generate_hash(
+                question_data['question_text'], 
+                question_data['options']
+            )
+            
+            # 檢查是否與其他題目重複（排除自己）
+            existing = self.execute_query(
+                'SELECT id FROM questions WHERE question_hash = ? AND id != ?', 
+                (question_hash, question_id)
+            )
+            
+            if existing:
+                return False  # 與其他題目重複
+            
+            # 更新題目
+            query = '''
+                UPDATE questions SET 
+                    question_hash = ?, question_text = ?, question_type = ?, options = ?,
+                    correct_answer = ?, correct_answers = ?, category = ?, difficulty = ?, 
+                    explanation = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            '''
+            
+            params = (
+                question_hash,
+                question_data['question_text'],
+                question_data['question_type'],
+                json.dumps(question_data['options'], ensure_ascii=False),
+                question_data.get('correct_answer'),
+                json.dumps(question_data.get('correct_answers', []), ensure_ascii=False),
+                question_data.get('category', '一般'),
+                question_data.get('difficulty', '中等'),
+                question_data.get('explanation', ''),
+                question_id
+            )
+            
+            result = self.execute_query(query, params)
+            return True
+            
+        except Exception as e:
+            print(f"Error updating question: {e}")
+            return False
+    
     def get_all(self, page: int = 1, per_page: int = 20, 
                 category: str = None, difficulty: str = None,
                 question_type: str = None) -> Dict[str, Any]:
@@ -207,8 +254,7 @@ class Question(BaseModel):
             GROUP BY category
         ''')
         for row in rows:
-            category_stats[row['category']] = row['count']
-        
+            category_stats[row['category']] = row['count']        
         # 按難度統計
         difficulty_stats = {}
         rows = self.execute_query('''
@@ -220,20 +266,59 @@ class Question(BaseModel):
             difficulty_stats[row['difficulty']] = row['count']
         
         return {
-            'total_questions': total,
-            'type_stats': type_stats,
+            'total_questions': total,            'type_stats': type_stats,
             'category_stats': category_stats,
             'difficulty_stats': difficulty_stats
         }
     
     def _format_question(self, row) -> Dict[str, Any]:
         """格式化題目數據"""
+        options = json.loads(row['options'])
+        
+        # 處理正確答案
+        if row['question_type'] == 'multiple_choice':
+            # 多選題：從 correct_answers 字段讀取
+            if row['correct_answers']:
+                try:
+                    correct_answer_data = json.loads(row['correct_answers'])
+                    # 確保是索引列表
+                    if isinstance(correct_answer_data, list):
+                        correct_answer = [int(x) for x in correct_answer_data if isinstance(x, (int, str)) and str(x).isdigit()]
+                    else:
+                        correct_answer = []
+                except (json.JSONDecodeError, TypeError):
+                    # 如果 correct_answers 解析失敗，嘗試從 correct_answer 字段解析
+                    if row['correct_answer'] and ',' in str(row['correct_answer']):
+                        try:
+                            correct_answer = [int(x.strip()) for x in str(row['correct_answer']).split(',')]
+                        except ValueError:
+                            correct_answer = []
+                    else:
+                        correct_answer = []
+            else:
+                # 如果 correct_answers 為空，嘗試從 correct_answer 字段解析
+                if row['correct_answer'] and ',' in str(row['correct_answer']):
+                    try:
+                        correct_answer = [int(x.strip()) for x in str(row['correct_answer']).split(',')]
+                    except ValueError:
+                        correct_answer = []
+                else:
+                    correct_answer = []
+        else:
+            # 單選題：從 correct_answer 字段讀取
+            if row['correct_answer'] is not None:
+                try:
+                    correct_answer = int(row['correct_answer'])
+                except (ValueError, TypeError):
+                    correct_answer = 0
+            else:
+                correct_answer = 0        
         return {
             'id': row['id'],
             'question': row['question_text'],
-            'type': 'single' if row['question_type'] == 'single_choice' else 'multiple',
-            'options': json.loads(row['options']),
-            'correct_answer': json.loads(row['correct_answers']) if row['correct_answers'] else [int(row['correct_answer'])] if row['correct_answer'] else [],
+            'type': 'single' if row['question_type'] == 'single_choice' else ('multiple' if row['question_type'] == 'multiple_choice' else row['question_type']),
+            'options': options,
+            'correct_answer': correct_answer,
             'category': row['category'],
             'difficulty': row['difficulty'],
             'explanation': row['explanation'],

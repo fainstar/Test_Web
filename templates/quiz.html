@@ -55,10 +55,12 @@
                     {% endif %}
                 </div>
             </div>
-            
-            <div class="card-body">
-                <form id="answerForm" method="POST" action="{{ url_for('quiz.submit_answer') }}">
+              <div class="card-body">
+                <form id="answerForm" method="POST" action="{{ url_for('quiz.submit_answer', session_id=quiz_info.session_id, question_index=question_number-1) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="session_id" value="{{ quiz_info.session_id }}" />
+                    <input type="hidden" name="question_id" value="{{ question.id }}" />
+                    <input type="hidden" name="question_index" value="{{ question_number - 1 }}" />
                     
                     <!-- 題目文字 -->
                     <div class="question-text mb-4">

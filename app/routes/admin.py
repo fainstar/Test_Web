@@ -49,6 +49,7 @@ def questions():
     """題目管理"""
     try:
         page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 'all')  # 默認顯示全部
         category = request.args.get('category')
         difficulty = request.args.get('difficulty')
         question_type = request.args.get('question_type')
@@ -61,7 +62,15 @@ def questions():
         if question_type:
             filters['question_type'] = question_type
         
-        result = question_service.get_questions(page=page, per_page=20, filters=filters)
+        # 處理每頁顯示數量
+        if per_page == 'all':
+            # 獲取總題目數
+            total_count = question_service.get_total_count()
+            per_page_num = max(total_count, 1000)  # 確保能顯示所有題目
+        else:
+            per_page_num = int(per_page) if per_page.isdigit() else 20
+        
+        result = question_service.get_questions(page=page, per_page=per_page_num, filters=filters)
         stats = question_service.get_statistics()
         
         return render_template('admin/questions.html',
@@ -79,9 +88,41 @@ def questions():
 
 @admin_bp.route('/questions/add', methods=['GET', 'POST'])
 def add_question():
-    """添加題目"""
+    """添加或編輯題目"""
+    edit_id = request.args.get('edit', type=int)
+    is_editing = edit_id is not None
+    
     if request.method == 'GET':
-        return render_template('admin/add_question.html')
+        if is_editing:
+            # 編輯模式：獲取現有題目數據
+            try:
+                question = question_service.get_question(edit_id)
+                if not question:
+                    flash('題目不存在', 'error')
+                    return redirect(url_for('admin.questions'))
+                
+                # 格式化題目數據以便表單顯示
+                question_data = {
+                    'id': question['id'],
+                    'question': question['question'],
+                    'type': question['type'],
+                    'options': question['options'],
+                    'correct_answer': question['correct_answer'],
+                    'category': question.get('category', '一般'),
+                    'difficulty': question.get('difficulty', '中等'),
+                    'explanation': question.get('explanation', '')
+                }
+                
+                return render_template('admin/add_question.html', 
+                                     question_data=question_data, 
+                                     is_editing=True,
+                                     edit_id=edit_id)
+            except Exception as e:
+                flash(f'載入題目數據失敗: {str(e)}', 'error')
+                return redirect(url_for('admin.questions'))
+        else:
+            # 新增模式
+            return render_template('admin/add_question.html', is_editing=False)
     
     elif request.method == 'POST':
         try:
@@ -104,32 +145,66 @@ def add_question():
             # 過濾空選項
             question_data['options'] = [opt for opt in question_data['options'] if opt.strip()]
             
-            # 添加題目
-            result = question_service.add_question(question_data)
-            
-            if result['success']:
-                flash('題目添加成功！', 'success')
-                return redirect(url_for('admin.questions'))
+            if is_editing:
+                # 編輯模式：更新題目
+                question_data['id'] = edit_id
+                result = question_service.update_question(edit_id, question_data)
+                
+                if result['success']:
+                    flash('題目更新成功！', 'success')
+                    return redirect(url_for('admin.questions'))
+                else:
+                    flash(result['message'], 'warning')
+                    return render_template('admin/add_question.html', 
+                                         question_data=question_data, 
+                                         is_editing=True,
+                                         edit_id=edit_id)
             else:
-                flash(result['message'], 'warning')
-                return render_template('admin/add_question.html', question_data=question_data)
+                # 新增模式：添加題目
+                result = question_service.add_question(question_data)
+                
+                if result['success']:
+                    flash('題目添加成功！', 'success')
+                    return redirect(url_for('admin.questions'))
+                else:
+                    flash(result['message'], 'warning')
+                    return render_template('admin/add_question.html', 
+                                         question_data=question_data, 
+                                         is_editing=False)
                 
         except Exception as e:
-            flash(f'添加題目失敗: {str(e)}', 'error')
-            return render_template('admin/add_question.html')
+            flash(f'{"更新" if is_editing else "添加"}題目失敗: {str(e)}', 'error')
+            return render_template('admin/add_question.html', 
+                                 is_editing=is_editing,
+                                 edit_id=edit_id if is_editing else None)
 
 @admin_bp.route('/questions/<int:question_id>/delete', methods=['POST'])
 def delete_question(question_id):
     """刪除題目"""
     try:
+        print(f"收到刪除請求，題目ID: {question_id}")  # 調試信息
+        
+        # 先檢查題目是否存在
+        question = question_service.get_question(question_id)
+        if not question:
+            print(f"題目 {question_id} 不存在")
+            flash('題目不存在', 'error')
+            return redirect(url_for('admin.questions'))
+        
+        print(f"準備刪除題目: {question['question'][:50]}...")
+        
         result = question_service.delete_question(question_id)
+        print(f"刪除結果: {result}")
         
         if result['success']:
             flash('題目刪除成功！', 'success')
+            print(f"題目 {question_id} 刪除成功")
         else:
             flash(result['message'], 'error')
+            print(f"題目 {question_id} 刪除失敗: {result['message']}")
             
     except Exception as e:
+        print(f"刪除題目時發生異常: {str(e)}")
         flash(f'刪除題目失敗: {str(e)}', 'error')
     
     return redirect(url_for('admin.questions'))

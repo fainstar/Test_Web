@@ -10,9 +10,8 @@ class Config:
     """基礎配置類"""
     
     # Flask基本配置
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-      # 數據庫配置
-    DATABASE_PATH = os.environ.get('DATABASE_PATH') or 'quiz_database.db'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'    # 數據庫配置
+    DATABASE_PATH = os.environ.get('DATABASE_PATH') or 'dev_quiz_database.db'
     
     @classmethod
     def init_app(cls, app):
@@ -65,9 +64,8 @@ class ProductionConfig(Config):
     
     # 安全配置
     SESSION_COOKIE_SECURE = True
-    
-    # 生產環境數據庫
-    DATABASE_PATH = os.environ.get('DATABASE_PATH') or '/app/volumes/database/quiz_database.db'
+      # 生產環境數據庫
+    DATABASE_PATH = os.environ.get('DATABASE_PATH') or '/app/volumes/database/dev_quiz_database.db'
 
 class TestingConfig(Config):
     """測試環境配置"""

@@ -61,6 +61,27 @@ def register_blueprints(app):
 
 def init_extensions(app):
     """初始化Flask擴展"""
+    # 初始化CSRF保護
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect(app)
+    
+    # 排除整個 API 藍圖的 CSRF 保護
+    from app.routes.api import api_bp
+    csrf.exempt(api_bp)
+    
+    # 註冊CSRF錯誤處理器
+    @app.errorhandler(400)
+    def handle_csrf_error(e):
+        from flask import request, redirect, url_for, flash
+        if 'CSRF' in str(e):
+            flash('安全驗證失敗，請重新嘗試', 'warning')
+            # 如果是測驗相關的CSRF錯誤，重定向到開始頁面
+            if '/quiz/' in request.path:
+                return redirect(url_for('quiz.start_quiz'))
+            else:
+                return redirect(url_for('main.index'))
+        return str(e), 400
+    
     # 這裡可以初始化其他擴展，如Flask-SQLAlchemy, Flask-Login等
     pass
 
