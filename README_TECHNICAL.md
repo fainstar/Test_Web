@@ -97,7 +97,13 @@ def calculate_question_hash(question_data):
 - `POST /quiz/<int:question_id>` - 提交答案
 - `GET /results` - 顯示測驗結果
 
-### 管理路由
+### API路由
+- `GET /api/` - API根路由，重定向說明
+- `GET /api/health` - 系統健康檢查
+- `GET /api/questions` - 獲取題目列表
+- `GET /api/statistics` - 獲取系統統計資料
+- `POST /api/questions` - 新增題目 (管理員)
+- `DELETE /api/questions/<int:question_id>` - 刪除題目 (管理員)
 - `GET /admin` - 管理後台首頁
 - `GET /admin/questions` - 題目管理列表
 - `POST /admin/add_question` - 新增題目
@@ -234,8 +240,28 @@ REINDEX;
 PRAGMA integrity_check;
 ```
 
+## 修復記錄
+
+### 2025年6月22日 - API健康檢查修復
+**問題**：`/api/health` 路由出現 `'QuestionService' object has no attribute 'get_total_count'` 錯誤
+
+**修復方案**：
+在 `app/services/question_service.py` 中新增缺少的方法：
+- `get_total_count()` - 獲取題目總數
+- `get_current_time()` - 獲取當前時間
+
+**影響範圍**：
+- ✅ 修復健康檢查API (`/api/health`)
+- ✅ 確保Docker容器健康狀態檢查正常
+- ✅ 維持所有其他API功能正常
+
+**驗證結果**：
+- Docker容器狀態：healthy
+- API回應：所有端點正常 (200狀態碼)
+- Web界面：正常運作
+
 ---
 
 **技術版本**：Flask 3.0.0 + SQLite 3 + Python 3.7+  
 **架構模式**：MVC + 單體應用  
-**最後更新**：2024年
+**最後更新**：2025年6月22日

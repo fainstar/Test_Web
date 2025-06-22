@@ -226,7 +226,85 @@ services:
 ```
 
 ### 健康檢查
-系統已內建健康檢查，會自動重啟不健康的容器。
+系統已內建健康檢查，會自動重啟不健康的容器：
+
+```bash
+# 檢查容器健康狀態
+docker-compose ps
+
+# 手動測試健康檢查端點
+docker exec quiz-system curl -s localhost:5000/api/health
+
+# 預期回應格式
+{
+  "database": "connected",
+  "question_count": 0,
+  "status": "healthy", 
+  "timestamp": "2025-06-22T07:42:17.151739"
+}
+```
+
+**健康檢查指標：**
+- 資料庫連接狀態
+- 題目總數統計
+- 系統回應時間
+- 當前時間戳
+
+## 🚨 故障排除
+
+### 常見問題與解決方案
+
+#### 1. 容器啟動失敗
+```bash
+# 檢查容器日誌
+docker-compose logs quiz-app
+
+# 常見原因：
+# - 端口衝突：修改 docker-compose.yml 中的端口配置
+# - 權限問題：檢查資料夾權限
+# - 環境變數錯誤：檢查 .env 檔案
+```
+
+#### 2. API健康檢查失敗
+```bash
+# 檢查服務狀態
+docker exec quiz-system curl -s localhost:5000/api/health
+
+# 如果回應 500 錯誤，檢查：
+# - QuestionService 是否包含所需方法
+# - 資料庫是否正確初始化
+# - Python 依賴是否完整安裝
+```
+
+#### 3. 資料庫初始化問題
+```bash
+# 手動初始化資料庫
+docker-compose exec quiz-app python init_db.py
+
+# 檢查資料庫檔案
+docker-compose exec quiz-app ls -la /app/data/
+
+# 重建容器（清除所有數據）
+docker-compose down -v
+docker-compose up --build -d
+```
+
+#### 4. 重建映像檔
+```bash
+# 完全重建（無快取）
+docker-compose build --no-cache
+
+# 清理舊映像檔
+docker image prune -f
+```
+
+### 修復記錄
+
+#### 2025年6月22日 - API健康檢查修復
+- **問題**：`/api/health` 端點回應 500 錯誤
+- **原因**：`QuestionService` 缺少 `get_total_count` 方法
+- **解決**：在 `question_service.py` 中新增缺少的方法
+- **驗證**：容器狀態顯示 healthy，API 正常回應
 
 ### 日誌輪轉
 建議配置日誌輪轉避免日誌檔案過大：

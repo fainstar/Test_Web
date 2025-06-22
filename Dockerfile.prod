@@ -29,8 +29,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 創建必要的目錄
-RUN mkdir -p volumes/database volumes/logs static/uploads && \
-    chown -R appuser:appgroup /app
+RUN mkdir -p volumes/database volumes/logs static/uploads /data && \
+    chown -R appuser:appgroup /app /data
 
 # 切換到非root用戶
 USER appuser

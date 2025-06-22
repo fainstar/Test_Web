@@ -4,6 +4,7 @@
 """
 import json
 import random
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from app.models import Question
 from config.config import get_config
@@ -14,6 +15,19 @@ class QuestionService:
     def __init__(self):
         config = get_config()
         self.question_model = Question(config.DATABASE_PATH)
+    
+    def get_total_count(self) -> int:
+        """獲取題目總數"""
+        try:
+            stats = self.question_model.get_statistics()
+            return stats.get('total_questions', 0)
+        except Exception as e:
+            print(f"Error getting total count: {e}")
+            return 0
+    
+    def get_current_time(self) -> str:
+        """獲取當前時間"""
+        return datetime.now().isoformat()
     
     def add_question(self, question_data: Dict[str, Any]) -> Dict[str, Any]:
         """添加題目"""

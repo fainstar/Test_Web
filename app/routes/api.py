@@ -11,6 +11,33 @@ api_bp = Blueprint('api', __name__)
 question_service = QuestionService()
 quiz_service = QuizService()
 
+@api_bp.route('/', methods=['GET'])
+def health_check():
+    """健康檢查端點"""
+    return jsonify({
+        'status': 'healthy',
+        'message': 'API is running',
+        'version': '1.0'
+    })
+
+@api_bp.route('/health', methods=['GET'])
+def api_health():
+    """API健康檢查"""
+    try:
+        # 檢查數據庫連接
+        question_count = question_service.get_total_count()
+        return jsonify({
+            'status': 'healthy',
+            'database': 'connected',
+            'question_count': question_count,
+            'timestamp': question_service.get_current_time()
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
 @api_bp.route('/questions', methods=['GET'])
 def get_questions():
     """獲取題目列表API"""

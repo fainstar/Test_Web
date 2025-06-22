@@ -11,8 +11,7 @@ class Config:
     
     # Flask基本配置
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    
-    # 數據庫配置
+      # 數據庫配置
     DATABASE_PATH = os.environ.get('DATABASE_PATH') or 'quiz_database.db'
     
     @classmethod
@@ -21,7 +20,13 @@ class Config:
         # 確保數據庫目錄存在
         db_path = Path(cls.DATABASE_PATH)
         if db_path.parent != Path('.'):
-            db_path.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                db_path.parent.mkdir(parents=True, exist_ok=True)
+            except PermissionError:
+                # 如果權限不足，嘗試記錄錯誤但不停止應用
+                print(f"Warning: Cannot create directory {db_path.parent}, using current directory")
+                # 回退到當前目錄
+                cls.DATABASE_PATH = db_path.name
     
     # Session配置
     PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
@@ -62,7 +67,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     
     # 生產環境數據庫
-    DATABASE_PATH = os.environ.get('DATABASE_PATH') or '/data/quiz_database.db'
+    DATABASE_PATH = os.environ.get('DATABASE_PATH') or '/app/volumes/database/quiz_database.db'
 
 class TestingConfig(Config):
     """測試環境配置"""

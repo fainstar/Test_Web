@@ -30,8 +30,8 @@ RUN adduser --disabled-password --gecos '' appuser
 COPY . .
 
 # 創建必要的目錄並設置權限
-RUN mkdir -p /app/volumes/database /app/volumes/logs /app/static/uploads && \
-    chown -R appuser:appuser /app
+RUN mkdir -p /app/volumes/database /app/volumes/logs /app/static/uploads /data && \
+    chown -R appuser:appuser /app /data
 
 # 切換到非root用戶
 USER appuser
@@ -44,7 +44,7 @@ EXPOSE 5000
 
 # 健康檢查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:5000/api || exit 1
+    CMD curl -f http://localhost:5000/ || exit 1
 
 # 啟動命令 - 使用gunicorn生產環境服務器
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "--keep-alive", "5", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
